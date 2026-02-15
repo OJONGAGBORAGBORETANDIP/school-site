@@ -37,12 +37,14 @@ class HeadteacherPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Headteacher/Resources'), for: 'App\Filament\Headteacher\Resources')
             ->discoverPages(in: app_path('Filament/Headteacher/Pages'), for: 'App\Filament\Headteacher\Pages')
             ->pages([
-                Dashboard::class,
+                \App\Filament\Headteacher\Pages\HeadteacherDashboard::class,
+                \App\Filament\Headteacher\Pages\PerformanceAnalytics::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Headteacher/Widgets'), for: 'App\Filament\Headteacher\Widgets')
             ->widgets([
+                \App\Filament\Headteacher\Widgets\ReportCardStatsWidget::class,
+                \App\Filament\Headteacher\Widgets\ClassPerformanceWidget::class,
                 AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
