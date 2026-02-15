@@ -42,5 +42,13 @@ class ClassSection extends Model
     {
         return $this->hasMany(TeacherAssignment::class);
     }
+
+    /**
+     * @return HasMany<Enrollment>
+     */
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
+    }
 }
 
