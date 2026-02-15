@@ -67,8 +67,9 @@ class StudentResource extends Resource
                     ->label('Class'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                //
             ])
+            ->recordUrl(fn (Student $record): string => static::getUrl('view', ['record' => $record]))
             ->bulkActions([
                 //
             ]);
