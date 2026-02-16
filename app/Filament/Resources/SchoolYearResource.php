@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Actions\BulkAction;
 
 class SchoolYearResource extends Resource
 {
@@ -26,23 +27,27 @@ class SchoolYearResource extends Resource
         return 'School Structure';
     }
 
+    public static function getFormComponents(): array
+    {
+        return [
+            Forms\Components\TextInput::make('name')
+                ->required()
+                ->unique(ignoreRecord: true)
+                ->maxLength(255)
+                ->placeholder('e.g., 2024-2025'),
+            Forms\Components\DatePicker::make('starts_at')
+                ->required(),
+            Forms\Components\DatePicker::make('ends_at')
+                ->required(),
+            Forms\Components\Toggle::make('is_current')
+                ->label('Set as Current Year')
+                ->default(false),
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255)
-                    ->placeholder('e.g., 2024-2025'),
-                Forms\Components\DatePicker::make('starts_at')
-                    ->required(),
-                Forms\Components\DatePicker::make('ends_at')
-                    ->required(),
-                Forms\Components\Toggle::make('is_current')
-                    ->label('Set as Current Year')
-                    ->default(false),
-            ]);
+        return $schema->schema(static::getFormComponents());
     }
 
     public static function table(Table $table): Table
@@ -66,13 +71,24 @@ class SchoolYearResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_current'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                \Filament\Actions\Action::make('edit')
+                    ->icon('heroicon-o-pencil')
+                    ->form(static::getFormComponents())
+                    ->fillForm(fn ($record) => $record->toArray())
+                    ->action(fn ($record, array $data) => $record->update($data)),
+                \Filament\Actions\Action::make('delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->delete()),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                BulkAction::make('delete')
+                    ->label('Delete selected')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($records) => $records->each->delete()),
             ]);
     }
 

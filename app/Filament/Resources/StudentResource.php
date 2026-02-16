@@ -9,7 +9,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-
+use Filament\Actions\BulkAction;
+use Filament\Schemas\Components\Section;
 class StudentResource extends Resource
 {
     protected static ?string $model = Student::class;
@@ -30,7 +31,7 @@ class StudentResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make('Personal Information')
+                Section::make('Personal Information')
                     ->schema([
                         Forms\Components\TextInput::make('first_name')
                             ->required()
@@ -47,7 +48,7 @@ class StudentResource extends Resource
                                 'female' => 'Female',
                             ]),
                     ])->columns(2),
-                Forms\Components\Section::make('Admission Information')
+                Section::make('Admission Information')
                     ->schema([
                         Forms\Components\TextInput::make('admission_number')
                             ->required()
@@ -92,13 +93,22 @@ class StudentResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                \Filament\Actions\Action::make('edit')
+                    ->icon('heroicon-o-pencil')
+                    ->url(fn ($record) => static::getUrl('edit', ['record' => $record])),
+                \Filament\Actions\Action::make('delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->delete()),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                BulkAction::make('delete')
+                    ->label('Delete selected')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($records) => $records->each->delete()),
             ]);
     }
 

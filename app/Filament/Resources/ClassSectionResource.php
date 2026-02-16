@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SchoolClassResource\Pages;
-use App\Models\SchoolClass;
+use App\Filament\Resources\ClassSectionResource\Pages;
+use App\Models\ClassSection;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -11,15 +11,15 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions\BulkAction;
 
-class SchoolClassResource extends Resource
+class ClassSectionResource extends Resource
 {
-    protected static ?string $model = SchoolClass::class;
+    protected static ?string $model = ClassSection::class;
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationIcon(): ?string
     {
-        return 'heroicon-o-building-office';
+        return 'heroicon-o-squares-2x2';
     }
 
     public static function getNavigationGroup(): ?string
@@ -30,20 +30,29 @@ class SchoolClassResource extends Resource
     public static function getFormComponents(): array
     {
         return [
+            Forms\Components\Select::make('school_class_id')
+                ->label('School Class')
+                ->relationship('schoolClass', 'name')
+                ->required()
+                ->searchable()
+                ->preload(),
             Forms\Components\TextInput::make('name')
                 ->required()
                 ->maxLength(255)
-                ->placeholder('e.g., Primary 1'),
-            Forms\Components\TextInput::make('code')
-                ->required()
-                ->unique(ignoreRecord: true)
+                ->placeholder('e.g., A, B, C'),
+            Forms\Components\TextInput::make('label')
                 ->maxLength(255)
-                ->placeholder('e.g., P1'),
-            Forms\Components\TextInput::make('level')
-                ->required()
+                ->placeholder('e.g., P1A, P1B')
+                ->helperText('Auto-generated if left empty'),
+            Forms\Components\TextInput::make('capacity')
                 ->numeric()
                 ->minValue(1)
-                ->maxValue(6),
+                ->helperText('Maximum number of students'),
+            Forms\Components\Select::make('class_teacher_id')
+                ->label('Class Teacher')
+                ->relationship('classTeacher', 'name', fn ($query) => $query->whereHas('roles', fn ($q) => $q->where('name', 'teacher')))
+                ->searchable()
+                ->preload(),
         ];
     }
 
@@ -56,20 +65,33 @@ class SchoolClassResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('schoolClass.name')
+                    ->label('Class')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('code')
+                Tables\Columns\TextColumn::make('label')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('level')
+                Tables\Columns\TextColumn::make('capacity')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sections_count')
-                    ->counts('sections')
-                    ->label('Sections'),
+                Tables\Columns\TextColumn::make('classTeacher.name')
+                    ->label('Class Teacher')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('enrollments_count')
+                    ->counts('enrollments')
+                    ->label('Students')
+                    ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('school_class_id')
+                    ->label('School Class')
+                    ->relationship('schoolClass', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 \Filament\Actions\Action::make('edit')
@@ -96,7 +118,7 @@ class SchoolClassResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageSchoolClasses::route('/'),
+            'index' => Pages\ManageClassSections::route('/'),
         ];
     }
 }

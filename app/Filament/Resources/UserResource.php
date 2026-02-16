@@ -10,6 +10,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Filament\Actions\BulkAction;
 
 class UserResource extends Resource
 {
@@ -77,13 +78,22 @@ class UserResource extends Resource
                     ->multiple(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                \Filament\Actions\Action::make('edit')
+                    ->icon('heroicon-o-pencil')
+                    ->url(fn ($record) => static::getUrl('edit', ['record' => $record])),
+                \Filament\Actions\Action::make('delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->delete()),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                BulkAction::make('delete')
+                    ->label('Delete selected')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($records) => $records->each->delete()),
             ]);
     }
 

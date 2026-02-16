@@ -9,7 +9,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 
 class TermReportResource extends Resource
@@ -124,8 +123,11 @@ class TermReportResource extends Resource
                     ->falseLabel('Pending'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Action::make('approve')
+                \Filament\Actions\Action::make('edit')
+                    ->label('Edit')
+                    ->icon('heroicon-o-pencil')
+                    ->url(fn (TermReport $record): string => static::getUrl('edit', ['record' => $record])),
+                \Filament\Actions\Action::make('approve')
                     ->label('Approve')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -136,7 +138,7 @@ class TermReportResource extends Resource
                         ]);
                     })
                     ->visible(fn (TermReport $record) => !$record->is_approved_by_headteacher),
-                Action::make('reject')
+                \Filament\Actions\Action::make('reject')
                     ->label('Reject')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
@@ -149,19 +151,16 @@ class TermReportResource extends Resource
                     ->visible(fn (TermReport $record) => $record->is_approved_by_headteacher),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Action::make('bulk_approve')
-                        ->label('Approve Selected')
-                        ->icon('heroicon-o-check-circle')
-                        ->color('success')
-                        ->requiresConfirmation()
-                        ->action(function ($records) {
-                            $records->each(function ($record) {
-                                $record->update(['is_approved_by_headteacher' => true]);
-                            });
-                        }),
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                \Filament\Actions\Action::make('bulk_approve')
+                    ->label('Approve Selected')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(function ($records) {
+                        $records->each(function ($record) {
+                            $record->update(['is_approved_by_headteacher' => true]);
+                        });
+                    }),
             ])
             ->defaultSort('created_at', 'desc');
     }

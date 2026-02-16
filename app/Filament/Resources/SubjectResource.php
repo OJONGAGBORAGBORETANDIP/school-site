@@ -9,7 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-
+use Filament\Actions\BulkAction;
 class SubjectResource extends Resource
 {
     protected static ?string $model = Subject::class;
@@ -26,33 +26,37 @@ class SubjectResource extends Resource
         return 'School Structure';
     }
 
+    public static function getFormComponents(): array
+    {
+        return [
+            Forms\Components\TextInput::make('name')
+                ->required()
+                ->maxLength(255),
+            Forms\Components\TextInput::make('code')
+                ->required()
+                ->unique(ignoreRecord: true)
+                ->maxLength(255)
+                ->placeholder('e.g., ENG, MATH'),
+            Forms\Components\TextInput::make('min_level')
+                ->required()
+                ->numeric()
+                ->default(1)
+                ->minValue(1)
+                ->maxValue(6),
+            Forms\Components\TextInput::make('max_level')
+                ->required()
+                ->numeric()
+                ->default(6)
+                ->minValue(1)
+                ->maxValue(6),
+            Forms\Components\Toggle::make('is_compulsory')
+                ->default(true),
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('code')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255)
-                    ->placeholder('e.g., ENG, MATH'),
-                Forms\Components\TextInput::make('min_level')
-                    ->required()
-                    ->numeric()
-                    ->default(1)
-                    ->minValue(1)
-                    ->maxValue(6),
-                Forms\Components\TextInput::make('max_level')
-                    ->required()
-                    ->numeric()
-                    ->default(6)
-                    ->minValue(1)
-                    ->maxValue(6),
-                Forms\Components\Toggle::make('is_compulsory')
-                    ->default(true),
-            ]);
+        return $schema->schema(static::getFormComponents());
     }
 
     public static function table(Table $table): Table
@@ -76,13 +80,24 @@ class SubjectResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_compulsory'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                \Filament\Actions\Action::make('edit')
+                    ->icon('heroicon-o-pencil')
+                    ->form(static::getFormComponents())
+                    ->fillForm(fn ($record) => $record->toArray())
+                    ->action(fn ($record, array $data) => $record->update($data)),
+                \Filament\Actions\Action::make('delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->delete()),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                BulkAction::make('delete')
+                    ->label('Delete selected')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn ($records) => $records->each->delete()),
             ]);
     }
 

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SchoolClassResource\Pages;
-use App\Models\SchoolClass;
+use App\Filament\Resources\TermResource\Pages;
+use App\Models\Term;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -11,15 +11,15 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions\BulkAction;
 
-class SchoolClassResource extends Resource
+class TermResource extends Resource
 {
-    protected static ?string $model = SchoolClass::class;
+    protected static ?string $model = Term::class;
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 4;
 
     public static function getNavigationIcon(): ?string
     {
-        return 'heroicon-o-building-office';
+        return 'heroicon-o-calendar-days';
     }
 
     public static function getNavigationGroup(): ?string
@@ -30,20 +30,28 @@ class SchoolClassResource extends Resource
     public static function getFormComponents(): array
     {
         return [
-            Forms\Components\TextInput::make('name')
+            Forms\Components\Select::make('school_year_id')
+                ->label('School Year')
+                ->relationship('schoolYear', 'name')
                 ->required()
-                ->maxLength(255)
-                ->placeholder('e.g., Primary 1'),
-            Forms\Components\TextInput::make('code')
-                ->required()
-                ->unique(ignoreRecord: true)
-                ->maxLength(255)
-                ->placeholder('e.g., P1'),
-            Forms\Components\TextInput::make('level')
+                ->searchable()
+                ->preload(),
+            Forms\Components\TextInput::make('number')
                 ->required()
                 ->numeric()
                 ->minValue(1)
-                ->maxValue(6),
+                ->maxValue(3)
+                ->helperText('Term number: 1, 2, or 3'),
+            Forms\Components\TextInput::make('name')
+                ->required()
+                ->maxLength(255)
+                ->placeholder('e.g., 1st Term, 2nd Term, 3rd Term'),
+            Forms\Components\DatePicker::make('starts_at')
+                ->label('Start Date'),
+            Forms\Components\DatePicker::make('ends_at')
+                ->label('End Date'),
+            Forms\Components\DatePicker::make('results_published_at')
+                ->label('Results Published Date'),
         ];
     }
 
@@ -56,20 +64,32 @@ class SchoolClassResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('schoolYear.name')
+                    ->label('School Year')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('number')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('code')
-                    ->searchable()
+                Tables\Columns\TextColumn::make('starts_at')
+                    ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('level')
+                Tables\Columns\TextColumn::make('ends_at')
+                    ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sections_count')
-                    ->counts('sections')
-                    ->label('Sections'),
+                Tables\Columns\TextColumn::make('results_published_at')
+                    ->date()
+                    ->label('Published')
+                    ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('school_year_id')
+                    ->label('School Year')
+                    ->relationship('schoolYear', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 \Filament\Actions\Action::make('edit')
@@ -96,7 +116,7 @@ class SchoolClassResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageSchoolClasses::route('/'),
+            'index' => Pages\ManageTerms::route('/'),
         ];
     }
 }
