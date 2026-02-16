@@ -15,6 +15,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
+use Filament\Schemas\Schema;
 
 class MarksEntry extends Page implements HasForms
 {
@@ -49,11 +50,11 @@ class MarksEntry extends Page implements HasForms
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
         $teacherId = auth()->id();
 
-        return $form
+        return $schema
             ->schema([
                 Select::make('class_section_id')
                     ->label('Class Section')
@@ -69,38 +70,40 @@ class MarksEntry extends Page implements HasForms
                     })
                     ->required()
                     ->reactive()
-                    ->afterStateUpdated(function ($state) {
-                        $this->selectedClassSection = $state;
-                        $this->loadStudents();
+                    ->afterStateUpdated(function ($state, $livewire) {
+                        $livewire->selectedClassSection = $state;
+                        $livewire->loadStudents();
                     })
+                    
                     ->placeholder('Select a class section'),
 
                 Select::make('subject_id')
                     ->label('Subject')
-                    ->options(function () use ($teacherId) {
-                        if (!$this->selectedClassSection) {
+                    // Inject $livewire to access properties like selectedClassSection
+                    ->options(function ($livewire) use ($teacherId) {
+                        if (!$livewire->selectedClassSection) {
                             return [];
                         }
-
+                
                         return DB::table('teacher_assignments')
                             ->where('teacher_id', $teacherId)
-                            ->where('class_section_id', $this->selectedClassSection)
+                            ->where('class_section_id', $livewire->selectedClassSection)
                             ->join('subjects', 'teacher_assignments.subject_id', '=', 'subjects.id')
                             ->select('subjects.id', 'subjects.name', 'subjects.code')
                             ->get()
                             ->mapWithKeys(function ($subject) {
-                                return [$subject->id => $subject->name . ' (' . $subject->code . ')'];
+                                return [$subject->id => "{$subject->name} ({$subject->code})"];
                             });
                     })
                     ->required()
-                    ->reactive()
-                    ->afterStateUpdated(function ($state) {
-                        $this->selectedSubject = $state;
-                        $this->loadStudents();
+                    ->live() // Note: .live() is preferred over .reactive() in Filament v3
+                    ->afterStateUpdated(function ($state, $livewire) {
+                        $livewire->selectedSubject = $state;
+                        $livewire->loadStudents();
                     })
                     ->placeholder('Select a subject')
-                    ->disabled(fn () => !$this->selectedClassSection),
-
+                    ->disabled(fn ($livewire) => !$livewire->selectedClassSection),
+                
                 Select::make('term_id')
                     ->label('Term')
                     ->options(function () {
@@ -114,10 +117,11 @@ class MarksEntry extends Page implements HasForms
                     })
                     ->required()
                     ->reactive()
-                    ->afterStateUpdated(function ($state) {
-                        $this->selectedTerm = $state;
-                        $this->loadStudents();
+                    ->afterStateUpdated(function ($state, $livewire) {
+                        $livewire->selectedTerm = $state;
+                        $livewire->loadStudents();
                     })
+                    
                     ->placeholder('Select a term'),
             ])
             ->statePath('data');
