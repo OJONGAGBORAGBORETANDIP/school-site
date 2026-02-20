@@ -22,6 +22,9 @@ class MarksEntry extends Component
 
     public $marks = [];
 
+    /** Whether the current class+term has been submitted for approval (scores read-only). */
+    public $isSubmitted = false;
+
     public function mount(): void
     {
         $teacherId = auth()->id();
@@ -113,6 +116,12 @@ class MarksEntry extends Component
             }])
             ->get();
 
+        $enrollmentIds = $enrollments->pluck('id')->toArray();
+        $this->isSubmitted = TermReport::whereIn('enrollment_id', $enrollmentIds)
+            ->where('term_id', $this->selectedTerm)
+            ->whereNotNull('submitted_at')
+            ->exists();
+
         $this->marks = $enrollments->map(function ($enrollment) {
             $termReport = $enrollment->termReports->first();
             $subjectReport = null;
@@ -168,14 +177,38 @@ class MarksEntry extends Component
         }
     }
 
-    public function saveMarks(): void
+    /**
+     * Save scores as draft. Teacher can still edit before submitting.
+     */
+    public function saveAsDraft(): void
+    {
+        $this->saveMarks(submit: false);
+    }
+
+    /**
+     * Save scores and submit for approval by head teacher. Scores become read-only.
+     */
+    public function submitForApproval(): void
+    {
+        $this->saveMarks(submit: true);
+    }
+
+    /**
+     * Save CA and exam scores. When $submit is true, marks this class+term as submitted for head teacher approval.
+     */
+    protected function saveMarks(bool $submit = false): void
     {
         if (!$this->selectedClassSection || !$this->selectedSubject || !$this->selectedTerm) {
             session()->flash('error', 'Please select class section, subject, and term.');
             return;
         }
 
-        DB::transaction(function () {
+        if ($this->isSubmitted) {
+            session()->flash('error', 'Scores for this class and term are already submitted. Editing is not allowed.');
+            return;
+        }
+
+        DB::transaction(function () use ($submit) {
             foreach ($this->marks as $markData) {
                 if (empty($markData['ca_mark']) && empty($markData['exam_mark'])) {
                     continue;
@@ -203,9 +236,22 @@ class MarksEntry extends Component
                 $subjectReport->calculateTotal();
                 $subjectReport->save();
             }
+
+            if ($submit) {
+                $enrollmentIds = Enrollment::where('class_section_id', $this->selectedClassSection)
+                    ->where('is_active', true)
+                    ->pluck('id');
+                TermReport::whereIn('enrollment_id', $enrollmentIds)
+                    ->where('term_id', $this->selectedTerm)
+                    ->update(['submitted_at' => now()]);
+            }
         });
 
-        session()->flash('success', 'Marks saved successfully!');
+        if ($submit) {
+            session()->flash('success', 'Scores saved and submitted for head teacher approval. You can no longer edit them.');
+        } else {
+            session()->flash('success', 'Scores saved as draft. You can edit and submit later.');
+        }
         $this->loadStudents();
     }
 

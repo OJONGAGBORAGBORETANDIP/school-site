@@ -21,13 +21,27 @@ class TermReport extends Model
         'class_teacher_remark',
         'headteacher_remark',
         'is_approved_by_headteacher',
+        'submitted_at',
     ];
 
     protected $casts = [
         'average' => 'decimal:2',
         'class_average' => 'decimal:2',
         'is_approved_by_headteacher' => 'boolean',
+        'submitted_at' => 'datetime',
     ];
+
+    /** Whether this term report is still draft (editable by teacher). */
+    public function isDraft(): bool
+    {
+        return $this->submitted_at === null;
+    }
+
+    /** Whether this term report has been submitted for head teacher approval. */
+    public function isSubmitted(): bool
+    {
+        return $this->submitted_at !== null;
+    }
 
     public function enrollment(): BelongsTo
     {
