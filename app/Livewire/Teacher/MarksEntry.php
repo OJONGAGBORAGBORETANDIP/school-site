@@ -212,7 +212,10 @@ class MarksEntry extends Component
     public function render()
     {
         return view('livewire.teacher.marks-entry')
-            ->layout('layouts.teacher');
+            ->layout('layouts.teacher', [
+                'headerTitle' => 'Marks entry',
+                'headerSubtitle' => 'Enter and manage subject marks by class and term',
+            ]);
     }
 }
 

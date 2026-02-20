@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>Parent Portal – {{ config('app.name') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -24,7 +24,7 @@
             <nav class="flex items-center justify-end gap-4">
                 @auth
                     <a
-                        href="{{ url('/dashboard') }}"
+                        href="{{ route('dashboard') }}"
                         class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal"
                     >
                         Dashboard
@@ -44,6 +44,11 @@
                 @endauth
             </nav>
         </header>
+
+        <main class="lg:max-w-4xl max-w-[335px] flex-1 flex flex-col justify-center text-center">
+            <h1 class="text-2xl lg:text-3xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC] mb-2">Parent Portal</h1>
+            <p class="text-[#706f6c] dark:text-[#A1A09A] text-sm lg:text-base">Log in or register to view your children’s report cards and school information.</p>
+        </main>
 
         <div class="h-14.5 hidden lg:block"></div>
     </body>

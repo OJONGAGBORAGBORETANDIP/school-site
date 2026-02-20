@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
@@ -102,5 +103,15 @@ class User extends Authenticatable
     public function parentProfile(): HasOne
     {
         return $this->hasOne(ParentModel::class);
+    }
+
+    /**
+     * Teacher's class/subject assignments (when user is a teacher).
+     *
+     * @return HasMany<TeacherAssignment>
+     */
+    public function teacherAssignments(): HasMany
+    {
+        return $this->hasMany(TeacherAssignment::class, 'teacher_id');
     }
 }
