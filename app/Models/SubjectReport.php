@@ -19,13 +19,21 @@ class SubjectReport extends Model
         'grade',
         'remark',
         'teacher_comment',
+        'submitted_at',
     ];
 
     protected $casts = [
         'ca_mark' => 'decimal:2',
         'exam_mark' => 'decimal:2',
         'total_mark' => 'decimal:2',
+        'submitted_at' => 'datetime',
     ];
+
+    /** Whether this subject report has been submitted for head teacher approval. */
+    public function isSubmitted(): bool
+    {
+        return $this->submitted_at !== null;
+    }
 
     public function termReport(): BelongsTo
     {

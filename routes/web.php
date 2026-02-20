@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureUserIsTeacher;
 use App\Livewire\Teacher\MarksEntry;
+use App\Livewire\Teacher\ResultReview;
 use App\Models\SchoolYear;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +73,7 @@ Route::middleware([EnsureUserIsTeacher::class])
     ->name('teacher.')
     ->group(function () {
         Route::get('/marks-entry', MarksEntry::class)->name('marks-entry');
+        Route::get('/result-review', ResultReview::class)->name('result-review');
 
         Route::get('/class/{classSection}', function (App\Models\ClassSection $classSection) {
             $user = auth()->user();

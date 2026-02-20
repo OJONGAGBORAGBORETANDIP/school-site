@@ -42,12 +42,57 @@
         </div>
     </div>
 
+    @if(!empty($reviewSummary))
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Result review</h3>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Review all entered student results for this class and term before submission. Submit when marks are finalized.
+                </p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Subject</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Students with marks</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total students</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach($reviewSummary as $row)
+                            <tr>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{{ $row['label'] }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $row['entered'] }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $row['total'] }}</td>
+                                <td class="px-4 py-3">
+                                    @if($row['status'] === 'submitted')
+                                        <span class="inline-flex items-center rounded-md bg-green-100 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-800 dark:text-green-200">Submitted</span>
+                                    @else
+                                        <span class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">Draft</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+
     @if(!empty($marks))
         <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-wrap gap-2">
                 <div>
                     <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-                        {{ $isSubmitted ? 'Previously entered scores (submitted for approval)' : 'Enter marks' }}
+                        @if($isSubmitted)
+                            Previously entered scores (submitted for approval)
+                        @elseif(!$canEdit)
+                            Past term – view only
+                        @else
+                            Enter marks
+                        @endif
                     </h3>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         CA (Continuous Assessment) 40%, Exam 60%. Total, grade and remark are calculated automatically.
@@ -55,6 +100,8 @@
                 </div>
                 @if($isSubmitted)
                     <span class="inline-flex items-center rounded-md bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-sm font-medium text-amber-800 dark:text-amber-200">Submitted – view only</span>
+                @elseif(!$canEdit)
+                    <span class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300">Past term – read only</span>
                 @endif
             </div>
 
@@ -77,7 +124,7 @@
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $mark['student_name'] }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $mark['admission_number'] }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @if($isSubmitted)
+                                    @if(!$canEdit)
                                         <span class="text-sm text-gray-900 dark:text-gray-100">{{ $mark['ca_mark'] !== '' && $mark['ca_mark'] !== null ? number_format((float)$mark['ca_mark'], 2) : '-' }}</span>
                                     @else
                                         <input
@@ -91,7 +138,7 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @if($isSubmitted)
+                                    @if(!$canEdit)
                                         <span class="text-sm text-gray-900 dark:text-gray-100">{{ $mark['exam_mark'] !== '' && $mark['exam_mark'] !== null ? number_format((float)$mark['exam_mark'], 2) : '-' }}</span>
                                     @else
                                         <input
@@ -107,7 +154,7 @@
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $mark['total_mark'] ? number_format($mark['total_mark'], 2) : '-' }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $mark['grade'] ?? '-' }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @if($isSubmitted)
+                                    @if(!$canEdit)
                                         <span class="text-sm text-gray-600 dark:text-gray-400">{{ $mark['teacher_comment'] ?? '-' }}</span>
                                     @else
                                         <input
@@ -124,22 +171,38 @@
                 </table>
             </div>
 
-            @if(!$isSubmitted)
-                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-                    <button
-                        type="button"
-                        wire:click="saveAsDraft"
-                        class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        Save as draft
-                    </button>
-                    <button
-                        type="button"
-                        wire:click="submitForApproval"
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        Submit for approval
-                    </button>
+            @if($canEdit)
+                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                    @if(!empty($validationErrors))
+                        <div class="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
+                            <strong>Accuracy check:</strong> Fix the following before submitting:
+                            <ul class="mt-1 list-disc list-inside">
+                                @foreach($validationErrors as $err)
+                                    <li>{{ $err }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @else
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <strong>Accuracy check:</strong> All marks are within 0–100.
+                        </div>
+                    @endif
+                    <div class="flex justify-end gap-3">
+                        <button
+                            type="button"
+                            wire:click="saveAsDraft"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            Save as draft
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="saveAsDraft"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            Save
+                        </button>
+                    </div>
                 </div>
             @endif
 

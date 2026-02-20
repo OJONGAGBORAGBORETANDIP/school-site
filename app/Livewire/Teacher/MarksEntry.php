@@ -44,19 +44,30 @@ class MarksEntry extends Component
             })
             ->toArray();
 
-        // Load current school year terms
-        $this->terms = Term::whereHas('schoolYear', fn ($q) =>
-                $q->where('is_current', true)
-            )
+        // Load current school year terms (active term first for entry; others for view past)
+        $termsCollection = Term::whereHas('schoolYear', fn ($q) => $q->where('is_current', true))
             ->with('schoolYear')
-            ->get()
-            ->map(function ($term) {
-                return [
-                    'id' => $term->id,
-                    'label' => $term->name . ' - ' . $term->schoolYear->name,
-                ];
-            })
-            ->toArray();
+            ->orderBy('number')
+            ->get();
+        $activeTermId = Term::where('is_active', true)->value('id');
+        $termsCollection = $termsCollection->sortByDesc(fn ($t) => $t->id === $activeTermId ? 1 : 0)->values();
+        $this->terms = $termsCollection->map(function ($term) use ($activeTermId) {
+            $label = $term->name . ' – ' . ($term->schoolYear->name ?? '');
+            $label .= $term->id === $activeTermId ? ' (active – enter marks)' : ' (past – read only)';
+            return ['id' => $term->id, 'label' => $label];
+        })->toArray();
+
+        // Pre-select from query params (e.g. from Result Review "Marks entry" link)
+        $classSection = request()->query('class_section');
+        $term = request()->query('term');
+        $subject = request()->query('subject');
+        if ($classSection && $term && $subject) {
+            $this->selectedClassSection = $classSection;
+            $this->selectedTerm = $term;
+            $this->loadSubjects();
+            $this->selectedSubject = $subject;
+            $this->loadStudents();
+        }
     }
 
     public function updatedSelectedClassSection($value): void
@@ -118,8 +129,11 @@ class MarksEntry extends Component
             ->get();
 
         $enrollmentIds = $enrollments->pluck('id')->toArray();
-        $this->isSubmitted = TermReport::whereIn('enrollment_id', $enrollmentIds)
+        $termReportIds = TermReport::whereIn('enrollment_id', $enrollmentIds)
             ->where('term_id', $this->selectedTerm)
+            ->pluck('id');
+        $this->isSubmitted = $termReportIds->isNotEmpty() && SubjectReport::whereIn('term_report_id', $termReportIds)
+            ->where('subject_id', $this->selectedSubject)
             ->whereNotNull('submitted_at')
             ->exists();
 
@@ -179,6 +193,82 @@ class MarksEntry extends Component
     }
 
     /**
+     * Validate current marks: CA and Exam must be 0–100 when present.
+     * Returns list of error messages (empty if valid).
+     */
+    public function getValidationErrors(): array
+    {
+        $errors = [];
+        foreach ($this->marks as $index => $mark) {
+            $name = $mark['student_name'] ?? "Row " . ($index + 1);
+            foreach (['ca_mark' => 'CA', 'exam_mark' => 'Exam'] as $key => $label) {
+                $val = $mark[$key] ?? '';
+                if ($val === '' || $val === null) {
+                    continue;
+                }
+                $num = (float) $val;
+                if ($num < 0 || $num > 100) {
+                    $errors[] = "{$label} for {$name} must be between 0 and 100 (got " . round($num, 2) . ").";
+                }
+            }
+        }
+        return $errors;
+    }
+
+    /**
+     * Review summary for selected class + term: all subjects with entered/total counts and status.
+     */
+    public function getReviewSummary(): array
+    {
+        if (!$this->selectedClassSection || !$this->selectedTerm) {
+            return [];
+        }
+
+        $teacherId = auth()->id();
+        $enrollments = Enrollment::where('class_section_id', $this->selectedClassSection)
+            ->where('is_active', true)
+            ->get();
+        $totalStudents = $enrollments->count();
+        $enrollmentIds = $enrollments->pluck('id')->toArray();
+
+        $assignments = DB::table('teacher_assignments')
+            ->where('teacher_id', $teacherId)
+            ->where('class_section_id', $this->selectedClassSection)
+            ->join('subjects', 'teacher_assignments.subject_id', '=', 'subjects.id')
+            ->select('subjects.id', 'subjects.name', 'subjects.code')
+            ->get();
+
+        $termReportIds = TermReport::whereIn('enrollment_id', $enrollmentIds)
+            ->where('term_id', $this->selectedTerm)
+            ->pluck('id');
+
+        $summary = [];
+        foreach ($assignments as $subject) {
+            $entered = 0;
+            if ($termReportIds->isNotEmpty()) {
+                $entered = SubjectReport::whereIn('term_report_id', $termReportIds)
+                    ->where('subject_id', $subject->id)
+                    ->where(function ($q) {
+                        $q->whereNotNull('ca_mark')->orWhereNotNull('exam_mark');
+                    })
+                    ->count();
+            }
+            $subjectSubmitted = $termReportIds->isNotEmpty() && SubjectReport::whereIn('term_report_id', $termReportIds)
+                ->where('subject_id', $subject->id)
+                ->whereNotNull('submitted_at')
+                ->exists();
+            $summary[] = [
+                'subject_id' => $subject->id,
+                'label' => "{$subject->name} ({$subject->code})",
+                'entered' => $entered,
+                'total' => $totalStudents,
+                'status' => $subjectSubmitted ? 'submitted' : 'draft',
+            ];
+        }
+        return $summary;
+    }
+
+    /**
      * Save scores as draft. Teacher can still edit before submitting.
      */
     public function saveAsDraft(): void
@@ -188,14 +278,20 @@ class MarksEntry extends Component
 
     /**
      * Save scores and submit for approval by head teacher. Scores become read-only.
+     * Validates accuracy of marks before allowing submit.
      */
     public function submitForApproval(): void
     {
+        $errors = $this->getValidationErrors();
+        if (!empty($errors)) {
+            session()->flash('error', 'Please fix the following before submitting: ' . implode(' ', $errors));
+            return;
+        }
         $this->saveMarks(submit: true);
     }
 
     /**
-     * Save CA and exam scores. When $submit is true, marks this class+term as submitted for head teacher approval.
+     * Save CA and exam scores. When $submit is true, marks only this subject's scores as submitted (not the whole term).
      */
     protected function saveMarks(bool $submit = false): void
     {
@@ -205,7 +301,13 @@ class MarksEntry extends Component
         }
 
         if ($this->isSubmitted) {
-            session()->flash('error', 'Scores for this class and term are already submitted. Editing is not allowed.');
+            session()->flash('error', 'Scores for this subject are already submitted. Editing is not allowed.');
+            return;
+        }
+
+        $activeTermId = Term::where('is_active', true)->value('id');
+        if (!$activeTermId || (string) $this->selectedTerm !== (string) $activeTermId) {
+            session()->flash('error', 'You can enter or edit marks only for the active term. Select the active term or view past terms as read-only.');
             return;
         }
 
@@ -222,34 +324,29 @@ class MarksEntry extends Component
                     ]
                 );
 
+                $data = [
+                    'ca_mark' => $markData['ca_mark'] ?? null,
+                    'exam_mark' => $markData['exam_mark'] ?? null,
+                    'teacher_comment' => $markData['teacher_comment'] ?? null,
+                ];
+                if ($submit) {
+                    $data['submitted_at'] = now();
+                }
                 $subjectReport = SubjectReport::updateOrCreate(
                     [
                         'term_report_id' => $termReport->id,
                         'subject_id' => $this->selectedSubject,
                     ],
-                    [
-                        'ca_mark' => $markData['ca_mark'] ?? null,
-                        'exam_mark' => $markData['exam_mark'] ?? null,
-                        'teacher_comment' => $markData['teacher_comment'] ?? null,
-                    ]
+                    $data
                 );
 
                 $subjectReport->calculateTotal();
                 $subjectReport->save();
             }
-
-            if ($submit) {
-                $enrollmentIds = Enrollment::where('class_section_id', $this->selectedClassSection)
-                    ->where('is_active', true)
-                    ->pluck('id');
-                TermReport::whereIn('enrollment_id', $enrollmentIds)
-                    ->where('term_id', $this->selectedTerm)
-                    ->update(['submitted_at' => now()]);
-            }
         });
 
         if ($submit) {
-            session()->flash('success', 'Scores saved and submitted for head teacher approval. You can no longer edit them.');
+            session()->flash('success', 'Scores for this subject saved and submitted for head teacher approval. You can still enter and submit other subjects.');
         } else {
             session()->flash('success', 'Scores saved as draft. You can edit and submit later.');
         }
@@ -259,9 +356,15 @@ class MarksEntry extends Component
     public function render()
     {
         $gradingScales = GradingScale::orderBy('min_mark', 'desc')->get();
+        $activeTermId = Term::where('is_active', true)->value('id');
+        $canEdit = !$this->isSubmitted
+            && $activeTermId
+            && (string) $this->selectedTerm === (string) $activeTermId;
 
         return view('livewire.teacher.marks-entry', [
             'gradingScales' => $gradingScales,
+            'activeTermId' => $activeTermId,
+            'canEdit' => $canEdit,
         ])->layout('layouts.dashboard', [
             'headerTitle' => 'Marks entry',
             'headerSubtitle' => 'Enter and manage subject marks by class and term',
