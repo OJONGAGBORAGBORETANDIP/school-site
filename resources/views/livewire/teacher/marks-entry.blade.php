@@ -142,6 +142,37 @@
                     </button>
                 </div>
             @endif
+
+            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 rounded-b-lg">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">How scores are calculated</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    <strong>Total mark</strong> = (CA × 40%) + (Exam × 60%)
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-500 mb-3">
+                    Continuous Assessment (CA) and Examination marks are each out of 100. The total is used to assign a grade and remark below.
+                </p>
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Grade assignment</h4>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm border border-gray-200 dark:border-gray-600 rounded-md">
+                        <thead class="bg-gray-100 dark:bg-gray-700">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total mark range</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Grade</th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Remark</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                            @foreach($gradingScales as $scale)
+                                <tr>
+                                    <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ $scale->min_mark }} – {{ $scale->max_mark }}</td>
+                                    <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $scale->grade }}</td>
+                                    <td class="px-3 py-2 text-gray-600 dark:text-gray-400">{{ $scale->remark }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     @endif
 </div>

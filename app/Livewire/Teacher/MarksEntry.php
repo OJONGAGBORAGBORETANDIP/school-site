@@ -4,6 +4,7 @@ namespace App\Livewire\Teacher;
 
 use App\Models\ClassSection;
 use App\Models\Enrollment;
+use App\Models\GradingScale;
 use App\Models\SubjectReport;
 use App\Models\Term;
 use App\Models\TermReport;
@@ -257,11 +258,14 @@ class MarksEntry extends Component
 
     public function render()
     {
-        return view('livewire.teacher.marks-entry')
-            ->layout('layouts.dashboard', [
-                'headerTitle' => 'Marks entry',
-                'headerSubtitle' => 'Enter and manage subject marks by class and term',
-            ]);
+        $gradingScales = GradingScale::orderBy('min_mark', 'desc')->get();
+
+        return view('livewire.teacher.marks-entry', [
+            'gradingScales' => $gradingScales,
+        ])->layout('layouts.dashboard', [
+            'headerTitle' => 'Marks entry',
+            'headerSubtitle' => 'Enter and manage subject marks by class and term',
+        ]);
     }
 }
 
