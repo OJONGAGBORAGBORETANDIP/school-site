@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\EnsureUserIsParent;
 use App\Http\Middleware\EnsureUserIsTeacher;
 use App\Livewire\Teacher\MarksEntry;
 use App\Models\SchoolYear;
@@ -10,7 +9,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Unified dashboard: same page for all authenticated users; content varies by role (parent / teacher).
+// Single dashboard: same layout (sidebar + nav + main) for all; content by role (teacher / parent).
 Route::get('dashboard', function () {
     $user = auth()->user();
     $parentStudents = collect();
@@ -58,53 +57,20 @@ Route::post('profile/password', function () {
     return back()->with('status', 'password-updated');
 })->middleware(['auth'])->name('password.update');
 
+Route::post('logout', function () {
+    auth()->logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/');
+})->middleware(['auth'])->name('logout');
+
 require __DIR__.'/auth.php';
 
-// Parent area (home page login is for parents)
-Route::middleware([EnsureUserIsParent::class])
-    ->prefix('parent')
-    ->name('parent.')
-    ->group(function () {
-        Route::get('/dashboard', function () {
-            $parent = auth()->user()->parentProfile;
-            $students = $parent ? $parent->students : collect();
-            return view('parent.dashboard', ['students' => $students]);
-        })->name('dashboard');
-        Route::post('/logout', function () {
-            auth()->logout();
-            request()->session()->invalidate();
-            request()->session()->regenerateToken();
-            return redirect('/');
-        })->name('logout');
-    });
-
-// Teacher area: sidebar + nav + main layout for all teacher pages
+// Teacher-only routes (sidebar shows "Marks entry" only for teachers)
 Route::middleware([EnsureUserIsTeacher::class])
     ->prefix('teacher')
     ->name('teacher.')
     ->group(function () {
-        Route::get('/dashboard', function () {
-            $user = auth()->user();
-            $assignments = $user->teacherAssignments()->with(['classSection.schoolClass', 'subject'])->get();
-            $assignedSections = $assignments->map(fn ($a) => $a->classSection)->unique('id')->values();
-            $assignedSubjects = $assignments->map(fn ($a) => $a->subject)->unique('id')->values();
-            $sectionsWithStudents = [];
-            $currentYear = SchoolYear::where('is_current', true)->first();
-            foreach ($assignedSections as $section) {
-                $query = $section->enrollments()->with('student')->where('is_active', true);
-                if ($currentYear) {
-                    $query->where('school_year_id', $currentYear->id);
-                }
-                $sectionsWithStudents[$section->id] = $query->get()->pluck('student');
-            }
-            return view('teacher.dashboard', [
-                'assignedSections' => $assignedSections,
-                'assignedSubjects' => $assignedSubjects,
-                'sectionsWithStudents' => $sectionsWithStudents,
-                'currentYear' => $currentYear,
-            ]);
-        })->name('dashboard');
-
         Route::get('/marks-entry', MarksEntry::class)->name('marks-entry');
 
         Route::get('/class/{classSection}', function (App\Models\ClassSection $classSection) {
@@ -124,11 +90,4 @@ Route::middleware([EnsureUserIsTeacher::class])
                 'enrollmentsByYear' => $enrollmentsByYear,
             ]);
         })->name('class-details');
-
-        Route::post('/logout', function () {
-            auth()->logout();
-            request()->session()->invalidate();
-            request()->session()->regenerateToken();
-            return redirect('/');
-        })->name('logout');
     });

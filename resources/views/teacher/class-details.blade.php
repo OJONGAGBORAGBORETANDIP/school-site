@@ -1,4 +1,4 @@
-@extends('layouts.teacher')
+@extends('layouts.dashboard')
 
 @section('title', $section->label . ' – Class details')
 @section('header-title', $section->label . ($section->schoolClass ? ' — ' . $section->schoolClass->name : ''))
@@ -7,7 +7,7 @@
 @section('content')
     <div class="space-y-6">
         <p>
-            <a href="{{ route('teacher.dashboard') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">← Back to dashboard</a>
+            <a href="{{ route('dashboard') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">← Back to dashboard</a>
         </p>
 
         @if($currentYear)

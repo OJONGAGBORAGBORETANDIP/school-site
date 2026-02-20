@@ -18,7 +18,7 @@
                 <p class="text-xs text-gray-500 mt-1">{{ config('app.name') }}</p>
             </div>
             <nav class="mt-4 space-y-1">
-                <a href="{{ route('parent.dashboard') }}" class="block px-6 py-2 text-sm hover:bg-emerald-50 {{ request()->routeIs('parent.dashboard') ? 'bg-emerald-100 text-emerald-700 font-semibold' : 'text-gray-700' }}">
+                <a href="{{ route('dashboard') }}" class="block px-6 py-2 text-sm hover:bg-emerald-50 {{ request()->routeIs('dashboard') ? 'bg-emerald-100 text-emerald-700 font-semibold' : 'text-gray-700' }}">
                     My Dashboard
                 </a>
             </nav>
@@ -30,7 +30,7 @@
                     <h2 class="text-lg font-semibold text-gray-900">@yield('title', 'Dashboard')</h2>
                     <div class="flex items-center gap-4">
                         <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>
-                        <form method="POST" action="{{ route('parent.logout') }}">
+                        <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="text-sm text-red-600 hover:text-red-800">Log out</button>
                         </form>
