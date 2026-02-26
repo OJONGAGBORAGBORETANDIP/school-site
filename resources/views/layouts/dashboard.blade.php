@@ -65,7 +65,7 @@
         <flux:dropdown position="top" align="start" class="max-lg:hidden">
             <flux:sidebar.profile avatar="https://fluxui.dev/img/demo/user.png" name="{{ auth()->user()->name }}" />
             <flux:menu>
-                <flux:menu.item icon="user" href="{{ route('profile') }}">{{ __('Profile') }}</flux:menu.item>
+                <flux:menu.item icon="user" href="{{ route('change-password') }}">{{ __('Change Password') }}</flux:menu.item>
                 <flux:menu.separator />
                 <flux:menu.item icon="arrow-right-start-on-rectangle">
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
@@ -83,7 +83,7 @@
         <flux:dropdown position="top" align="start">
             <flux:profile avatar="https://fluxui.dev/img/demo/user.png" />
             <flux:menu>
-                <flux:menu.item icon="user" href="{{ route('profile') }}">{{ __('Profile') }}</flux:menu.item>
+                <flux:menu.item icon="user" href="{{ route('change-password') }}">{{ __('Change Password') }}</flux:menu.item>
                 <flux:menu.separator />
                 <flux:menu.item icon="arrow-right-start-on-rectangle">
                     <form method="POST" action="{{ route('logout') }}" class="w-full">

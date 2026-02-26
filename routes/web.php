@@ -45,9 +45,9 @@ Route::get('dashboard', function () {
     ]);
 })->middleware(['auth'])->name('dashboard');
 
-Route::view('profile', 'profile')
+Route::view('change-password', 'change-password')
     ->middleware(['auth'])
-    ->name('profile');
+    ->name('change-password');
 Route::view('appearance', 'appearance')
     ->middleware(['auth'])
     ->name('appearance');

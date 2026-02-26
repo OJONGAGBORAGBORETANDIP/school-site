@@ -7,7 +7,7 @@
 @section('content')
 @php
     $isAppearance = request()->routeIs('appearance');
-    $isProfile = request()->routeIs('profile');
+    $isProfile = request()->routeIs('Change-Password');
 @endphp
 <div class="flex gap-6 min-h-0">
     {{-- Settings sidebar: Appearance, Profile (no tabs - use nav links) --}}
@@ -19,9 +19,9 @@
             <flux:sidebar.item icon="paint-brush" href="{{ route('appearance') }}">{{ __('Appearance') }}</flux:sidebar.item>
             @endif
             @if($isProfile)
-            <flux:sidebar.item icon="user" href="{{ route('profile') }}" current>{{ __('Profile') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="user" href="{{ route('change-password') }}" current>{{ __('Change Password') }}</flux:sidebar.item>
             @else
-            <flux:sidebar.item icon="user" href="{{ route('profile') }}">{{ __('Profile') }}</flux:sidebar.item>
+            <flux:sidebar.item icon="user" href="{{ route('change-password') }}">{{ __('Change Password') }}</flux:sidebar.item>
             @endif
         </flux:sidebar.nav>
     </flux:sidebar>
