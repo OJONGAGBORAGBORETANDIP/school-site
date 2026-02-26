@@ -79,14 +79,6 @@
                             @csrf
                             <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">Log out</button>
                         </form>
-                        <div x-data class="flex items-center gap-2">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">Theme</span>
-                            {{-- <flux:radio.group variant="segmented" x-model="$flux.appearance">
-                                <flux:radio value="light">Light</flux:radio>
-                                <flux:radio value="dark">Dark</flux:radio>
-                                <flux:radio value="system">System</flux:radio>
-                            </flux:radio.group> --}}
-                        </div>
                     </div>
                 </div>
             </header>

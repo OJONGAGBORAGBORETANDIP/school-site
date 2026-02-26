@@ -1,10 +1,6 @@
-@extends('layouts.dashboard')
+@extends('layouts.settings-layout')
 
-@section('title', 'Profile')
-@section('header-title', 'Profile')
-@section('header-subtitle', 'Change your password')
-
-@section('content')
+@section('settingsContent')
     <div class="space-y-6">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
             <div class="p-6">
