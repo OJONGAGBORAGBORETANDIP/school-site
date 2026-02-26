@@ -6,11 +6,12 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "barryvdh/laravel-dompdf": "^3.0",
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.0",
         "filament/filament": "*",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "livewire/flux": "^2.12",
         "livewire/volt": "*"
     },
     "require-dev": {

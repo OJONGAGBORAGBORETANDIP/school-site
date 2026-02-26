@@ -48,6 +48,12 @@ Route::get('dashboard', function () {
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+Route::view('appearance', 'appearance')
+    ->middleware(['auth'])
+    ->name('appearance');
+Route::view('settings', 'settings')
+    ->middleware(['auth'])
+    ->name('settings');
 
 Route::post('profile/password', function () {
     $validated = request()->validate([
