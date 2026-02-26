@@ -43,36 +43,33 @@ class ParentStudentSeeder extends Seeder
             $parentRecords[] = $parentRecord;
         }
 
-        // Link parents to students via pivot table
-        // Parent 1 -> Student 1 & 2
+        // Link parents to students via pivot table (with relationship for guardian dropdowns)
+        // Parent 1 (father) -> Student 1 & 2
         if (isset($parentRecords[0]) && isset($students[0])) {
-            DB::table('parent_student')->firstOrInsert([
-                'parent_id' => $parentRecords[0]->id,
-                'student_id' => $students[0]->id,
-            ]);
+            DB::table('parent_student')->updateOrInsert(
+                ['parent_id' => $parentRecords[0]->id, 'student_id' => $students[0]->id],
+                ['relationship' => $parentRecords[0]->relationship === 'mother' ? 'mother' : 'father']
+            );
         }
-
         if (isset($parentRecords[0]) && isset($students[1])) {
-            DB::table('parent_student')->firstOrInsert([
-                'parent_id' => $parentRecords[0]->id,
-                'student_id' => $students[1]->id,
-            ]);
+            DB::table('parent_student')->updateOrInsert(
+                ['parent_id' => $parentRecords[0]->id, 'student_id' => $students[1]->id],
+                ['relationship' => $parentRecords[0]->relationship === 'mother' ? 'mother' : 'father']
+            );
         }
-
-        // Parent 2 -> Student 3
+        // Parent 2 (mother) -> Student 3
         if (isset($parentRecords[1]) && isset($students[2])) {
-            DB::table('parent_student')->firstOrInsert([
-                'parent_id' => $parentRecords[1]->id,
-                'student_id' => $students[2]->id,
-            ]);
+            DB::table('parent_student')->updateOrInsert(
+                ['parent_id' => $parentRecords[1]->id, 'student_id' => $students[2]->id],
+                ['relationship' => $parentRecords[1]->relationship === 'mother' ? 'mother' : 'father']
+            );
         }
-
-        // Parent 3 -> Student 4
+        // Parent 3 -> Student 4 (as other guardian)
         if (isset($parentRecords[2]) && isset($students[3])) {
-            DB::table('parent_student')->firstOrInsert([
-                'parent_id' => $parentRecords[2]->id,
-                'student_id' => $students[3]->id,
-            ]);
+            DB::table('parent_student')->updateOrInsert(
+                ['parent_id' => $parentRecords[2]->id, 'student_id' => $students[3]->id],
+                ['relationship' => 'guardian']
+            );
         }
     }
 }

@@ -1,3 +1,4 @@
+{{-- Legacy layout with Livewire navigation. Prefer layouts.dashboard for parent/teacher pages. --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>

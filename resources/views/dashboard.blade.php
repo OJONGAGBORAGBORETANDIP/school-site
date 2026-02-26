@@ -80,9 +80,25 @@
                     @else
                         <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                             @foreach($parentStudents as $student)
-                                <li class="py-3 flex justify-between items-center">
+                                <li class="py-3 flex justify-between items-center flex-wrap gap-2">
                                     <span class="font-medium text-gray-900 dark:text-gray-100">{{ $student->first_name }} {{ $student->last_name }}</span>
-                                    <span class="text-sm text-gray-500">View report cards (coming soon)</span>
+                                    <div class="flex gap-2">
+                                        @php
+                                            $publishedReportTerms = $student->enrollments()
+                                                ->where('is_active', true)
+                                                ->with(['termReports' => fn ($q) => $q->with('term.schoolYear')->whereHas('term', fn ($t) => $t->whereNotNull('results_published_at'))])
+                                                ->get()
+                                                ->flatMap->termReports
+                                                ->unique('term_id')
+                                                ->sortByDesc(fn ($tr) => $tr->term_id)
+                                                ->take(5);
+                                        @endphp
+                                        @forelse($publishedReportTerms as $tr)
+                                            <a href="{{ route('report-card.show', [$student, $tr->term]) }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{{ $tr->term->name }} {{ $tr->term->schoolYear->name ?? '' }}</a>
+                                        @empty
+                                            <span class="text-sm text-gray-500">No report cards published yet</span>
+                                        @endforelse
+                                    </div>
                                 </li>
                             @endforeach
                         </ul>

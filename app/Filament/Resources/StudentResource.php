@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\StudentResource\Pages;
+use App\Models\ParentModel;
 use App\Models\Student;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -11,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions\BulkAction;
 use Filament\Schemas\Components\Section;
+
 class StudentResource extends Resource
 {
     protected static ?string $model = Student::class;
@@ -59,6 +61,28 @@ class StudentResource extends Resource
                             ->rows(3)
                             ->columnSpanFull(),
                     ])->columns(2),
+                Section::make('Guardians')
+                    ->description('Select the father, mother and/or other guardian for this student.')
+                    ->schema([
+                        Forms\Components\Select::make('father_id')
+                            ->label('Father')
+                            ->options(fn () => ParentModel::query()->orderBy('first_name')->get()->mapWithKeys(fn (ParentModel $p) => [$p->id => $p->first_name . ' ' . $p->last_name]))
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Select father'),
+                        Forms\Components\Select::make('mother_id')
+                            ->label('Mother')
+                            ->options(fn () => ParentModel::query()->orderBy('first_name')->get()->mapWithKeys(fn (ParentModel $p) => [$p->id => $p->first_name . ' ' . $p->last_name]))
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Select mother'),
+                        Forms\Components\Select::make('guardian_id')
+                            ->label('Other Guardian')
+                            ->options(fn () => ParentModel::query()->orderBy('first_name')->get()->mapWithKeys(fn (ParentModel $p) => [$p->id => $p->first_name . ' ' . $p->last_name]))
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Select other guardian'),
+                    ])->columns(3),
             ]);
     }
 

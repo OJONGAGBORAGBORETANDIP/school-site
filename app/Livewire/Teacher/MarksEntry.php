@@ -132,10 +132,16 @@ class MarksEntry extends Component
         $termReportIds = TermReport::whereIn('enrollment_id', $enrollmentIds)
             ->where('term_id', $this->selectedTerm)
             ->pluck('id');
-        $this->isSubmitted = $termReportIds->isNotEmpty() && SubjectReport::whereIn('term_report_id', $termReportIds)
+        $subjectSubmitted = $termReportIds->isNotEmpty() && SubjectReport::whereIn('term_report_id', $termReportIds)
             ->where('subject_id', $this->selectedSubject)
             ->whereNotNull('submitted_at')
             ->exists();
+        $termApproved = TermReport::whereIn('enrollment_id', $enrollmentIds)
+            ->where('term_id', $this->selectedTerm)
+            ->where('is_approved_by_headteacher', true)
+            ->exists();
+        $resultsPublished = Term::where('id', $this->selectedTerm)->whereNotNull('results_published_at')->exists();
+        $this->isSubmitted = $subjectSubmitted || $termApproved || $resultsPublished;
 
         $this->marks = $enrollments->map(function ($enrollment) {
             $termReport = $enrollment->termReports->first();

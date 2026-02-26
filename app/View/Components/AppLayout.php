@@ -5,13 +5,16 @@ namespace App\View\Components;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 
+/**
+ * Uses the same dashboard layout as parent and teacher (sidebar + header + main).
+ * Any view using <x-app-layout> gets the unified dashboard layout.
+ */
 class AppLayout extends Component
 {
-    /**
-     * Get the view / contents that represents the component.
-     */
     public function render(): View
     {
-        return view('layouts.app');
+        return view('layouts.dashboard', [
+            'headerTitle' => 'Dashboard',
+        ]);
     }
 }

@@ -65,6 +65,12 @@ Route::post('logout', function () {
     return redirect('/');
 })->middleware(['auth'])->name('logout');
 
+// Report card: parents (own children only when published), teachers/headteacher/admin (when approved)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/report-card/{student}/{term}', [App\Http\Controllers\ReportCardController::class, 'show'])->name('report-card.show');
+    Route::get('/report-card/{student}/{term}/pdf', [App\Http\Controllers\ReportCardController::class, 'downloadPdf'])->name('report-card.download');
+});
+
 require __DIR__.'/auth.php';
 
 // Teacher-only routes (sidebar shows "Marks entry" only for teachers)

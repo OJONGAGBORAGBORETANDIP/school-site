@@ -1,3 +1,4 @@
+{{-- Unified layout for parent and teacher: sidebar (nav by role) + header + main content. --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>

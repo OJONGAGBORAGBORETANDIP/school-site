@@ -33,7 +33,9 @@ class Student extends Model
      */
     public function parents(): BelongsToMany
     {
-        return $this->belongsToMany(ParentModel::class, 'parent_student')->withTimestamps();
+        return $this->belongsToMany(ParentModel::class, 'parent_student', 'student_id', 'parent_id')
+            ->withPivot('relationship')
+            ->withTimestamps();
     }
 
     /**

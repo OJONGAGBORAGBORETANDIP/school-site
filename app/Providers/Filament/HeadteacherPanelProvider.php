@@ -38,6 +38,7 @@ class HeadteacherPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Headteacher/Pages'), for: 'App\Filament\Headteacher\Pages')
             ->pages([
                 \App\Filament\Headteacher\Pages\HeadteacherDashboard::class,
+                \App\Filament\Headteacher\Pages\ClassResultsActions::class,
                 \App\Filament\Headteacher\Pages\PerformanceAnalytics::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Headteacher/Widgets'), for: 'App\Filament\Headteacher\Widgets')

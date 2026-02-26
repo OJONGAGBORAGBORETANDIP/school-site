@@ -135,6 +135,7 @@ class TermReportResource extends Resource
                     ->action(function (TermReport $record) {
                         $record->update([
                             'is_approved_by_headteacher' => true,
+                            'submitted_at' => now(),
                         ]);
                     })
                     ->visible(fn (TermReport $record) => !$record->is_approved_by_headteacher),
@@ -158,7 +159,10 @@ class TermReportResource extends Resource
                     ->requiresConfirmation()
                     ->action(function ($records) {
                         $records->each(function ($record) {
-                            $record->update(['is_approved_by_headteacher' => true]);
+                            $record->update([
+                                'is_approved_by_headteacher' => true,
+                                'submitted_at' => now(),
+                            ]);
                         });
                     }),
             ])

@@ -85,6 +85,17 @@ class TermResource extends Resource
                         $record->update(['is_active' => true]);
                     })
                     ->visible(fn (Term $record) => !$record->is_active),
+                \Filament\Actions\Action::make('publishResults')
+                    ->label('Publish Results')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('primary')
+                    ->requiresConfirmation()
+                    ->modalHeading('Publish results')
+                    ->modalDescription(fn (Term $record) => "Parents will be able to view report cards for \"{$record->name} - {$record->schoolYear->name}\". Teachers will no longer be able to edit marks.")
+                    ->action(function (Term $record) {
+                        app(\App\Services\PublishResultsService::class)->publishTermResults($record->id);
+                    })
+                    ->visible(fn (Term $record) => $record->results_published_at === null),
             ])
             ->defaultSort('school_year_id', 'desc');
     }
