@@ -51,7 +51,7 @@ Route::view('profile', 'profile')
 Route::view('appearance', 'appearance')
     ->middleware(['auth'])
     ->name('appearance');
-Route::view('settings', 'settings')
+Route::view('settings-layout', 'layouts.settings-layout')
     ->middleware(['auth'])
     ->name('settings');
 
