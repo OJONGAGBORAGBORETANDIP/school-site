@@ -25,37 +25,12 @@
                         Close
                     </x-filament::button>
                 </div>
-                @php $rows = $this->getViewMarksRows(); @endphp
                 <div class="flex-1 overflow-y-auto p-4 sm:p-6">
-                    <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-white/10">
-                        <table class="w-full divide-y divide-gray-200 dark:divide-white/10">
-                            <thead class="bg-gray-50 dark:bg-white/5">
-                                <tr>
-                                    <th scope="col" class="px-4 py-3 text-start text-sm font-semibold text-gray-950 dark:text-white">Student</th>
-                                    @if($viewMarksType === 'ca')
-                                        <th scope="col" class="px-4 py-3 text-end text-sm font-semibold text-gray-950 dark:text-white">CA mark (out of 30)</th>
-                                    @else
-                                        <th scope="col" class="px-4 py-3 text-end text-sm font-semibold text-gray-950 dark:text-white">Exam mark (out of 70)</th>
-                                    @endif
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-white/10 dark:bg-white/5">
-                                @forelse($rows as $row)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-950 dark:text-white">{{ $row['student_name'] }}</td>
-                                        @if($viewMarksType === 'ca')
-                                            <td class="px-4 py-3 text-end text-sm text-gray-700 dark:text-gray-300">{{ $row['ca_mark'] ?? '—' }}</td>
-                                        @else
-                                            <td class="px-4 py-3 text-end text-sm text-gray-700 dark:text-gray-300">{{ $row['exam_mark'] ?? '—' }}</td>
-                                        @endif
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="2" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">No marks to display.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                    <div>
+                        @livewire(\App\Livewire\ViewMarksTable::class, [
+                            'rows' => $this->getViewMarksRows(),
+                            'markType' => $viewMarksType,
+                        ], key('view-marks-' . $viewMarksSubjectId))
                     </div>
                 </div>
             </div>
