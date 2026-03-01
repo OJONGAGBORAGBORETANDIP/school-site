@@ -49,7 +49,7 @@ class MarksEntry extends Component
             ->with('schoolYear')
             ->orderBy('number')
             ->get();
-        $activeTermId = Term::where('is_active', true)->value('id');
+        $activeTermId = static::getActiveTermId();
         $termsCollection = $termsCollection->sortByDesc(fn ($t) => $t->id === $activeTermId ? 1 : 0)->values();
         $this->terms = $termsCollection->map(function ($term) use ($activeTermId) {
             $label = $term->name . ' – ' . ($term->schoolYear->name ?? '');
@@ -311,7 +311,7 @@ class MarksEntry extends Component
             return;
         }
 
-        $activeTermId = Term::where('is_active', true)->value('id');
+        $activeTermId = static::getActiveTermId();
         if (!$activeTermId || (string) $this->selectedTerm !== (string) $activeTermId) {
             session()->flash('error', 'You can enter or edit marks only for the active term. Select the active term or view past terms as read-only.');
             return;
@@ -359,10 +359,25 @@ class MarksEntry extends Component
         $this->loadStudents();
     }
 
+    /**
+     * Active term for data entry: term with is_active = true, or first term of current school year as fallback.
+     */
+    protected static function getActiveTermId(): ?int
+    {
+        $active = Term::where('is_active', true)->value('id');
+        if ($active !== null) {
+            return (int) $active;
+        }
+        $firstTerm = Term::whereHas('schoolYear', fn ($q) => $q->where('is_current', true))
+            ->orderBy('number')
+            ->first();
+        return $firstTerm ? (int) $firstTerm->id : null;
+    }
+
     public function render()
     {
         $gradingScales = GradingScale::orderBy('min_mark', 'desc')->get();
-        $activeTermId = Term::where('is_active', true)->value('id');
+        $activeTermId = static::getActiveTermId();
         $canEdit = !$this->isSubmitted
             && $activeTermId
             && (string) $this->selectedTerm === (string) $activeTermId;

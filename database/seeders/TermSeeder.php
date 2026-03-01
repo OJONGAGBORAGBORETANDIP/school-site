@@ -56,5 +56,9 @@ class TermSeeder extends Seeder
                 $term
             );
         }
+
+        // Set the first term of the current year as active so teachers can enter marks
+        Term::where('school_year_id', $currentYear->id)->update(['is_active' => false]);
+        Term::where('school_year_id', $currentYear->id)->where('number', 1)->update(['is_active' => true]);
     }
 }
