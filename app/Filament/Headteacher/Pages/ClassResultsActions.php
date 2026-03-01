@@ -42,8 +42,10 @@ class ClassResultsActions extends Page implements HasForms
     public static function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(4)
             ->schema([
                 Select::make('class_section_id')
+                    ->columnSpan(2)
                     ->label('Class Section')
                     ->options(
                         ClassSection::query()
@@ -55,6 +57,7 @@ class ClassResultsActions extends Page implements HasForms
                     ->searchable()
                     ->live(),
                 Select::make('term_id')
+                    ->columnSpan(2)
                     ->label('Term')
                     ->options(
                         Term::query()

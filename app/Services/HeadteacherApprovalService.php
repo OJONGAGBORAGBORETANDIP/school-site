@@ -356,12 +356,29 @@ class HeadteacherApprovalService
      */
     private function checkAndCompleteTermApprovals(\Illuminate\Support\Collection $termReportIds, Term $term): void
     {
+        $this->ensureApprovalStatusForTermReports($termReportIds, $term);
+    }
+
+    /**
+     * For the given term report IDs, set is_approved_by_headteacher and notify parents when a term report
+     * is fully approved (all subject reports have CA/Exam either not entered or approved).
+     * Call this after generating reports so parent visibility is correct.
+     * Only updates and notifies when not already approved (avoids duplicate notifications).
+     */
+    public function ensureApprovalStatusForTermReports(\Illuminate\Support\Collection $termReportIds, Term $term): void
+    {
+        if ($termReportIds->isEmpty()) {
+            return;
+        }
         $termName = $term->name . ' – ' . ($term->schoolYear->name ?? '');
         TermReport::whereIn('id', $termReportIds)
-            ->with(['enrollment.student.parents.user'])
+            ->with(['enrollment.student.parents.user', 'subjectReports'])
             ->get()
             ->each(function (TermReport $tr) use ($termName, $term) {
                 if (!$tr->isFullyApproved()) {
+                    return;
+                }
+                if ($tr->is_approved_by_headteacher) {
                     return;
                 }
                 $tr->update(['is_approved_by_headteacher' => true, 'submitted_at' => now()]);

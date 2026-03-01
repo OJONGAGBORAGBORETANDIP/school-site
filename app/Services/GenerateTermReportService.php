@@ -77,6 +77,11 @@ class GenerateTermReportService
             // Step 4: Position ranking (ties get same position, next rank skips: 90, 90, 85 -> 1, 1, 3)
             $this->assignPositions($termReports);
 
+            // Step 5: If any term report is fully approved (all CA/Exam approved), set is_approved_by_headteacher
+            // so parents can view report cards. Idempotent: only updates when not already approved.
+            $termReportIds = collect($termReports)->pluck('id');
+            app(HeadteacherApprovalService::class)->ensureApprovalStatusForTermReports($termReportIds, $term);
+
             return ['generated' => $generated, 'updated' => $updated];
         });
     }

@@ -57,6 +57,14 @@ class TermReport extends Model
         });
     }
 
+    /** Whether at least one subject has an approved CA or Exam (parent can see interim marks). */
+    public function hasAnyApprovedMarks(): bool
+    {
+        return $this->subjectReports->contains(function ($sr) {
+            return $sr->ca_approved_at !== null || $sr->exam_approved_at !== null;
+        });
+    }
+
     public function enrollment(): BelongsTo
     {
         return $this->belongsTo(Enrollment::class);

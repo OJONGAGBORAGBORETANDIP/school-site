@@ -69,34 +69,35 @@
         @endif
 
         @if(auth()->user()->isParent())
-            <section class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700">
+            <section id="report-cards" class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700 scroll-mt-4">
                 <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Parent</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Your children and report cards.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Report cards</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">View your children’s interim marks (as the headteacher approves each subject) and full results with class position when released.</p>
                 </div>
                 <div class="p-6">
                     @if($parentStudents->isEmpty())
-                        <p class="text-sm text-amber-700 dark:text-amber-400">No children linked yet. Contact the school to link your account.</p>
+                        <p class="text-sm text-amber-700 dark:text-amber-400">No children are linked to your account. Contact the school to link your children so you can see their report cards here.</p>
                     @else
                         <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                             @foreach($parentStudents as $student)
                                 <li class="py-3 flex justify-between items-center flex-wrap gap-2">
                                     <span class="font-medium text-gray-900 dark:text-gray-100">{{ $student->first_name }} {{ $student->last_name }}</span>
-                                    <div class="flex gap-2">
+                                    <div class="flex flex-wrap gap-2 items-center">
                                         @php
-                                            $publishedReportTerms = $student->enrollments()
+                                            $visibleReportTerms = $student->enrollments()
                                                 ->where('is_active', true)
-                                                ->with(['termReports' => fn ($q) => $q->with('term.schoolYear')->whereHas('term', fn ($t) => $t->whereNotNull('results_published_at'))])
+                                                ->with(['termReports' => fn ($q) => $q->with(['term.schoolYear', 'subjectReports'])->whereHas('term')])
                                                 ->get()
                                                 ->flatMap->termReports
+                                                ->filter(fn ($tr) => $tr->is_approved_by_headteacher || $tr->hasAnyApprovedMarks())
                                                 ->unique('term_id')
                                                 ->sortByDesc(fn ($tr) => $tr->term_id)
                                                 ->take(5);
                                         @endphp
-                                        @forelse($publishedReportTerms as $tr)
-                                            <a href="{{ route('report-card.show', [$student, $tr->term]) }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{{ $tr->term->name }} {{ $tr->term->schoolYear->name ?? '' }}</a>
+                                        @forelse($visibleReportTerms as $tr)
+                                            <a href="{{ route('report-card.show', [$student, $tr->term]) }}" class="inline-flex items-center px-3 py-1.5 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50">{{ $tr->term->name }} {{ $tr->term->schoolYear->name ?? '' }} →</a>
                                         @empty
-                                            <span class="text-sm text-gray-500">No report cards published yet</span>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400">No results for this child yet. Marks will appear here once the headteacher approves them.</span>
                                         @endforelse
                                     </div>
                                 </li>
@@ -109,7 +110,8 @@
 
         @if(!auth()->user()->isTeacher() && !auth()->user()->isParent())
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700">
-                {{ __("You're logged in.") }}
+                <p>{{ __("You're logged in.") }}</p>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">If you are a parent and expect to see your children’s report cards here, contact the school to ensure your account has the parent role and your children are linked to your account.</p>
             </div>
         @endif
     </div>

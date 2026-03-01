@@ -49,6 +49,13 @@
                 <flux:sidebar.item icon="document-text" href="{{ route('teacher.result-review') }}">{{ __('Result review') }}</flux:sidebar.item>
                 @endif
             @endif
+            @if(auth()->user()->isParent())
+                @if($isDashboard)
+                <flux:sidebar.item icon="academic-cap" href="{{ route('dashboard') }}#report-cards" current>{{ __('Report cards') }}</flux:sidebar.item>
+                @else
+                <flux:sidebar.item icon="academic-cap" href="{{ route('dashboard') }}#report-cards">{{ __('Report cards') }}</flux:sidebar.item>
+                @endif
+            @endif
         </flux:sidebar.nav>
 
         <flux:sidebar.spacer />

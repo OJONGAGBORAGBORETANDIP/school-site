@@ -42,21 +42,27 @@ class ReportCardController extends Controller
             abort(404, 'No term report found for this student and term.');
         }
 
-        // Parents: can only view when headmaster has approved this report card
-        if (auth()->user()->isParent() && !$termReport->is_approved_by_headteacher) {
-            abort(403, 'This report card is not yet approved. It will be visible after headmaster approval.');
+        // Parents: can view when headteacher has approved at least one CA/Exam (interim), or full report when fully approved
+        $isParent = auth()->user()->isParent();
+        if ($isParent) {
+            if (!$termReport->is_approved_by_headteacher && !$termReport->hasAnyApprovedMarks()) {
+                abort(403, 'No approved results yet. Marks will appear here as the headteacher approves each subject.');
+            }
         }
 
         $attendanceSummary = $this->getAttendanceSummary($enrollment->id, $term->id);
+        $subjectReports = $termReport->subjectReports->sortBy(fn ($sr) => $sr->subject->name);
+        $showFullReport = !$isParent || $termReport->is_approved_by_headteacher;
 
         return view('report-cards.show', [
             'student' => $student,
             'term' => $term->load('schoolYear'),
             'enrollment' => $enrollment,
             'termReport' => $termReport,
-            'subjectReports' => $termReport->subjectReports->sortBy(fn ($sr) => $sr->subject->name),
+            'subjectReports' => $subjectReports,
             'behaviourRatings' => $termReport->behaviourRatings,
             'attendanceSummary' => $attendanceSummary,
+            'showFullReport' => $showFullReport,
         ]);
     }
 
