@@ -181,6 +181,24 @@ class MarksEntry extends Component
                 $caMark = (float) ($this->marks[$index]['ca_mark'] ?? 0);
                 $examMark = (float) ($this->marks[$index]['exam_mark'] ?? 0);
 
+                // Enforce limits: CA max 30, Exam max 70
+                if ($caMark > 30) {
+                    $this->marks[$index]['ca_mark'] = 30;
+                    $caMark = 30;
+                }
+                if ($caMark < 0) {
+                    $this->marks[$index]['ca_mark'] = 0;
+                    $caMark = 0;
+                }
+                if ($examMark > 70) {
+                    $this->marks[$index]['exam_mark'] = 70;
+                    $examMark = 70;
+                }
+                if ($examMark < 0) {
+                    $this->marks[$index]['exam_mark'] = 0;
+                    $examMark = 0;
+                }
+
                 if ($caMark > 0 || $examMark > 0) {
                     // Final score = CA (out of 30) + Exam (out of 70) = total out of 100
                     $totalMark = $caMark + $examMark;
@@ -282,9 +300,15 @@ class MarksEntry extends Component
 
     /**
      * Save scores as draft. Teacher can still edit before submitting.
+     * Validates CA (0–30) and Exam (0–70) before saving.
      */
     public function saveAsDraft(): void
     {
+        $errors = $this->getValidationErrors();
+        if (!empty($errors)) {
+            session()->flash('error', 'Please fix the following: ' . implode(' ', $errors));
+            return;
+        }
         $this->saveMarks(submit: false);
     }
 
@@ -304,11 +328,18 @@ class MarksEntry extends Component
 
     /**
      * Save CA and exam scores. When $submit is true, marks only this subject's scores as submitted (not the whole term).
+     * Validates CA ≤ 30 and Exam ≤ 70 before saving.
      */
     protected function saveMarks(bool $submit = false): void
     {
         if (!$this->selectedClassSection || !$this->selectedSubject || !$this->selectedTerm) {
             session()->flash('error', 'Please select class section, subject, and term.');
+            return;
+        }
+
+        $errors = $this->getValidationErrors();
+        if (!empty($errors)) {
+            session()->flash('error', 'Invalid marks. ' . implode(' ', $errors));
             return;
         }
 

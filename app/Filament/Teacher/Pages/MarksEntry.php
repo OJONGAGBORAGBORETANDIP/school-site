@@ -202,10 +202,38 @@ class MarksEntry extends Page implements HasForms
     {
         if (!$this->selectedClassSection || !$this->selectedSubject || !$this->selectedTerm) {
             \Filament\Notifications\Notification::make()
-            ->title('Error')
-            ->body('Please select class section, subject, and term.')
-            ->danger()
-            ->send();
+                ->title('Error')
+                ->body('Please select class section, subject, and term.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        // Validate: CA must be 0–30, Exam must be 0–70
+        $errors = [];
+        foreach ($this->marks as $index => $mark) {
+            $name = $mark['student_name'] ?? 'Row ' . ($index + 1);
+            $ca = $mark['ca_mark'] ?? null;
+            $exam = $mark['exam_mark'] ?? null;
+            if ($ca !== null && $ca !== '') {
+                $num = (float) $ca;
+                if ($num < 0 || $num > 30) {
+                    $errors[] = "CA for {$name} must be between 0 and 30.";
+                }
+            }
+            if ($exam !== null && $exam !== '') {
+                $num = (float) $exam;
+                if ($num < 0 || $num > 70) {
+                    $errors[] = "Exam for {$name} must be between 0 and 70.";
+                }
+            }
+        }
+        if (!empty($errors)) {
+            \Filament\Notifications\Notification::make()
+                ->title('Invalid marks')
+                ->body(implode(' ', $errors))
+                ->danger()
+                ->send();
             return;
         }
 
