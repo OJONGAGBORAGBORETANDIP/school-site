@@ -95,7 +95,7 @@
                         @endif
                     </h3>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        CA (Continuous Assessment) 40%, Exam 60%. Total, grade and remark are calculated automatically.
+                        CA (Continuous Assessment) out of 30, Exam out of 70. Final score = CA + Exam (out of 100). Grade and remark are assigned from the scale below.
                     </p>
                 </div>
                 @if($isSubmitted)
@@ -111,8 +111,8 @@
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Admission No.</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">CA Mark</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Exam Mark</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">CA (out of 30)</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Exam (out of 70)</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Grade</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Comment</th>
@@ -131,7 +131,7 @@
                                             type="number"
                                             step="0.01"
                                             min="0"
-                                            max="100"
+                                            max="30"
                                             wire:model.live="marks.{{ $index }}.ca_mark"
                                             class="w-20 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                                         />
@@ -145,7 +145,7 @@
                                             type="number"
                                             step="0.01"
                                             min="0"
-                                            max="100"
+                                            max="70"
                                             wire:model.live="marks.{{ $index }}.exam_mark"
                                             class="w-20 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                                         />
@@ -184,7 +184,7 @@
                         </div>
                     @else
                         <div class="text-sm text-gray-600 dark:text-gray-400">
-                            <strong>Accuracy check:</strong> All marks are within 0–100.
+                            <strong>Accuracy check:</strong> CA 0–30, Exam 0–70.
                         </div>
                     @endif
                     <div class="flex justify-end gap-3">
@@ -209,12 +209,12 @@
             <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 rounded-b-lg">
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">How scores are calculated</h4>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                    <strong>Total mark</strong> = (CA × 40%) + (Exam × 60%)
+                    <strong>Final score</strong> = CA + Exam (no conversion: CA is out of 30, Exam is out of 70; total is out of 100).
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-500 mb-3">
-                    Continuous Assessment (CA) and Examination marks are each out of 100. The total is used to assign a grade and remark below.
+                    Enter CA (0–30) and Exam (0–70). The system adds them to get the total (0–100) and assigns a grade from the scale below.
                 </p>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Grade assignment</h4>
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Grading scale (A–F, based on total out of 100)</h4>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm border border-gray-200 dark:border-gray-600 rounded-md">
                         <thead class="bg-gray-100 dark:bg-gray-700">

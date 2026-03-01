@@ -181,7 +181,8 @@ class MarksEntry extends Component
                 $examMark = (float) ($this->marks[$index]['exam_mark'] ?? 0);
 
                 if ($caMark > 0 || $examMark > 0) {
-                    $totalMark = ($caMark * 0.4) + ($examMark * 0.6);
+                    // Final score = CA (out of 30) + Exam (out of 70) = total out of 100
+                    $totalMark = $caMark + $examMark;
                     $this->marks[$index]['total_mark'] = round($totalMark, 2);
 
                     $gradeInfo = \App\Models\GradingScale::getGradeForMark($totalMark);
@@ -199,7 +200,7 @@ class MarksEntry extends Component
     }
 
     /**
-     * Validate current marks: CA and Exam must be 0–100 when present.
+     * Validate current marks: CA must be 0–30, Exam must be 0–70 when present.
      * Returns list of error messages (empty if valid).
      */
     public function getValidationErrors(): array
@@ -207,14 +208,18 @@ class MarksEntry extends Component
         $errors = [];
         foreach ($this->marks as $index => $mark) {
             $name = $mark['student_name'] ?? "Row " . ($index + 1);
-            foreach (['ca_mark' => 'CA', 'exam_mark' => 'Exam'] as $key => $label) {
-                $val = $mark[$key] ?? '';
-                if ($val === '' || $val === null) {
-                    continue;
+            $ca = $mark['ca_mark'] ?? '';
+            $exam = $mark['exam_mark'] ?? '';
+            if ($ca !== '' && $ca !== null) {
+                $num = (float) $ca;
+                if ($num < 0 || $num > 30) {
+                    $errors[] = "CA for {$name} must be between 0 and 30 (got " . round($num, 2) . ").";
                 }
-                $num = (float) $val;
-                if ($num < 0 || $num > 100) {
-                    $errors[] = "{$label} for {$name} must be between 0 and 100 (got " . round($num, 2) . ").";
+            }
+            if ($exam !== '' && $exam !== null) {
+                $num = (float) $exam;
+                if ($num < 0 || $num > 70) {
+                    $errors[] = "Exam for {$name} must be between 0 and 70 (got " . round($num, 2) . ").";
                 }
             }
         }

@@ -46,18 +46,16 @@ class SubjectReport extends Model
     }
 
     /**
-     * Calculate total mark from CA and Exam marks
+     * Calculate total mark from CA and Exam marks.
+     * CA is out of 30, Exam is out of 70. Final score = CA + Exam (out of 100).
+     * No weighting or percentage conversion is applied.
      */
     public function calculateTotal(): void
     {
-        $caWeight = 0.4; // 40% CA, 60% Exam (adjustable)
-        $examWeight = 0.6;
-
         if ($this->ca_mark !== null && $this->exam_mark !== null) {
-            $this->total_mark = ($this->ca_mark * $caWeight) + ($this->exam_mark * $examWeight);
-            
-            // Get grade and remark from grading scale
-            $gradeInfo = \App\Models\GradingScale::getGradeForMark($this->total_mark);
+            $this->total_mark = (float) $this->ca_mark + (float) $this->exam_mark;
+
+            $gradeInfo = \App\Models\GradingScale::getGradeForMark((float) $this->total_mark);
             if ($gradeInfo) {
                 $this->grade = $gradeInfo['grade'];
                 $this->remark = $gradeInfo['remark'];

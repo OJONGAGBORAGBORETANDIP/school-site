@@ -180,11 +180,10 @@ class MarksEntry extends Page implements HasForms
                 $examMark = (float) ($this->marks[$index]['exam_mark'] ?? 0);
                 
                 if ($caMark > 0 || $examMark > 0) {
-                    // Calculate total: 40% CA + 60% Exam
-                    $totalMark = ($caMark * 0.4) + ($examMark * 0.6);
+                    // Final score = CA (out of 30) + Exam (out of 70) = total out of 100
+                    $totalMark = $caMark + $examMark;
                     $this->marks[$index]['total_mark'] = round($totalMark, 2);
-                    
-                    // Get grade from grading scale
+
                     $gradeInfo = \App\Models\GradingScale::getGradeForMark($totalMark);
                     if ($gradeInfo) {
                         $this->marks[$index]['grade'] = $gradeInfo['grade'];
