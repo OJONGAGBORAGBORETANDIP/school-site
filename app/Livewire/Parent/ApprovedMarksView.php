@@ -4,6 +4,7 @@ namespace App\Livewire\Parent;
 
 use App\Models\Enrollment;
 use App\Models\SchoolYear;
+use App\Models\Student;
 use App\Models\Term;
 use Livewire\Component;
 
@@ -19,6 +20,9 @@ class ApprovedMarksView extends Component
     public ?string $schoolYearId = null;
 
     public ?string $termId = null;
+
+    /** Selected child (student id) to show results for. */
+    public ?string $studentId = null;
 
     public function mount(): void
     {
@@ -57,21 +61,41 @@ class ApprovedMarksView extends Component
             ->get();
     }
 
-    /** Rows for the table: student_name, subject_name, mark (CA or exam). Only approved. */
-    public function getRowsProperty()
+    /** Children (students) that have an enrollment in the selected school year. */
+    public function getChildrenProperty()
     {
         $user = auth()->user();
-        if (! $user->parentProfile || ! $this->schoolYearId || ! $this->termId) {
+        if (! $user->parentProfile || ! $this->schoolYearId) {
             return collect();
         }
 
         $studentIds = $user->parentProfile->students()->pluck('students.id');
 
-        $enrollments = Enrollment::where('is_active', true)
+        return Student::whereIn('id', $studentIds)
+            ->whereHas('enrollments', function ($q) {
+                $q->where('is_active', true)->where('school_year_id', $this->schoolYearId);
+            })
+            ->orderBy('first_name')
+            ->get();
+    }
+
+    /** Rows for the table: subject_name, mark. Only approved; only for selected child. */
+    public function getRowsProperty()
+    {
+        $user = auth()->user();
+        if (! $user->parentProfile || ! $this->schoolYearId || ! $this->termId || ! $this->studentId) {
+            return collect();
+        }
+
+        $allowedStudentIds = $user->parentProfile->students()->pluck('students.id')->all();
+        if (! in_array($this->studentId, $allowedStudentIds)) {
+            return collect();
+        }
+
+        $enrollment = Enrollment::where('is_active', true)
             ->where('school_year_id', $this->schoolYearId)
-            ->whereIn('student_id', $studentIds)
+            ->where('student_id', $this->studentId)
             ->with([
-                'student',
                 'termReports' => function ($q) {
                     $q->where('term_id', $this->termId)
                         ->with(['subjectReports' => function ($q) {
@@ -84,26 +108,24 @@ class ApprovedMarksView extends Component
                         }]);
                 },
             ])
-            ->get();
+            ->first();
+
+        if (! $enrollment) {
+            return collect();
+        }
+
+        $termReport = $enrollment->termReports->first();
+        if (! $termReport) {
+            return collect();
+        }
 
         $rows = collect();
-        foreach ($enrollments as $enrollment) {
-            $termReport = $enrollment->termReports->first();
-            if (! $termReport) {
-                continue;
-            }
-            $studentName = $enrollment->student->first_name . ' ' . $enrollment->student->last_name;
-            if ($enrollment->student->other_names) {
-                $studentName .= ' ' . $enrollment->student->other_names;
-            }
-            foreach ($termReport->subjectReports as $sr) {
-                $mark = $this->type === 'ca' ? $sr->ca_mark : $sr->exam_mark;
-                $rows->push([
-                    'student_name' => $studentName,
-                    'subject_name' => $sr->subject->name,
-                    'mark' => $mark !== null ? (string) round((float) $mark, 2) : '–',
-                ]);
-            }
+        foreach ($termReport->subjectReports as $sr) {
+            $mark = $this->type === 'ca' ? $sr->ca_mark : $sr->exam_mark;
+            $rows->push([
+                'subject_name' => $sr->subject->name,
+                'mark' => $mark !== null ? (string) round((float) $mark, 2) : '–',
+            ]);
         }
 
         return $rows;
@@ -112,6 +134,7 @@ class ApprovedMarksView extends Component
     public function updatedSchoolYearId(): void
     {
         $this->termId = null;
+        $this->studentId = null;
     }
 
     public function render()
@@ -120,10 +143,11 @@ class ApprovedMarksView extends Component
         return view('livewire.parent.approved-marks-view', [
             'schoolYears' => $this->schoolYears,
             'terms' => $this->terms,
+            'children' => $this->children,
             'rows' => $this->rows,
         ])->layout('layouts.dashboard', [
             'headerTitle' => $title,
-            'headerSubtitle' => 'Select school year and term to see approved marks.',
+            'headerSubtitle' => 'Select academic year, term and child to see approved marks.',
         ]);
     }
 }
