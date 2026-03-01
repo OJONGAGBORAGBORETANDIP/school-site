@@ -44,7 +44,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
     /** View marks overlay: which subject and type (ca|exam). */
     public ?int $viewMarksSubjectId = null;
     public ?string $viewMarksType = null;
-    public string $viewMarksSubjectName = '';
+    public ?string $viewMarksSubjectName = '';
 
     /** Sort state for Flux table (subject column). */
     public string $sortBy = 'subject';
