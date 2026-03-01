@@ -71,10 +71,14 @@ Route::post('logout', function () {
     return redirect('/');
 })->middleware(['auth'])->name('logout');
 
-Route::post('notifications/mark-all-read', function () {
-    auth()->user()->unreadNotifications->each(fn ($n) => $n->markAsRead());
-    return back();
-})->middleware(['auth'])->name('notifications.mark-all-read');
+Route::middleware(['auth'])->group(function () {
+    Route::get('notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('notifications/mark-all-read', function () {
+        auth()->user()->unreadNotifications->each(fn ($n) => $n->markAsRead());
+        return back();
+    })->name('notifications.mark-all-read');
+});
 
 // Report card: parents (own children only when published), teachers/headteacher/admin (when approved)
 Route::middleware(['auth'])->group(function () {

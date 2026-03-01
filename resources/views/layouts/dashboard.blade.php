@@ -79,48 +79,50 @@
             $unreadNotifications = auth()->user()->unreadNotifications()->latest()->take(5)->get();
             $unreadCount = auth()->user()->unreadNotifications()->count();
         @endphp
-        @if($unreadCount > 0)
         <flux:sidebar.nav>
             <flux:dropdown position="top" align="start" class="w-full">
                 <flux:sidebar.item icon="bell" class="relative">
-                    Notifications
+                    {{ __('Notifications') }}
                     @if($unreadCount > 0)
                         <span class="absolute right-2 top-1/2 -translate-y-1/2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs text-white">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
                     @endif
                 </flux:sidebar.item>
                 <flux:menu class="max-h-80 overflow-y-auto w-72">
-                    @foreach($unreadNotifications as $notification)
-                        @php $data = $notification->data; @endphp
-                        <flux:menu.item
-                            href="{{ 
-                                (($data['type'] ?? '') === 'report_approved' 
-                                && !empty($data['student_id']) 
-                                && !empty($data['term_id']))
-                                ? route('report-card.show', [
-                                    'student' => $data['student_id'], 
-                                    'term' => $data['term_id']
-                                ])
-                                : '#' 
-                            }}"
-                            icon="document-text"
-                        >
-                            <span class="text-sm">
-                                {{ $data['message'] ?? 'Notification' }}
-                            </span>
+                    @forelse($unreadNotifications as $notification)
+                        @php
+                            $data = $notification->data ?? [];
+                            $type = $data['type'] ?? '';
+                            $url = '#';
+                            if ($type === 'report_approved' && !empty($data['student_id']) && !empty($data['term_id'])) {
+                                $url = route('report-card.show', ['student' => $data['student_id'], 'term' => $data['term_id']]);
+                            } elseif ($type === 'report_rejected' && auth()->user()->isTeacher()) {
+                                $url = route('teacher.marks-entry');
+                            }
+                        @endphp
+                        <flux:menu.item href="{{ $url }}" icon="{{ $type === 'report_rejected' ? 'exclamation-triangle' : 'document-text' }}">
+                            <span class="text-sm">{{ $data['message'] ?? 'Notification' }}</span>
                         </flux:menu.item>
                         @if(!$loop->last)<flux:menu.separator />@endif
-                    @endforeach
+                    @empty
+                        <flux:menu.item icon="check-circle" href="{{ route('notifications.index') }}">
+                            <span class="text-sm text-gray-500">{{ __('No new notifications') }}</span>
+                        </flux:menu.item>
+                    @endforelse
                     <flux:menu.separator />
+                    @if($unreadCount > 0)
                     <flux:menu.item icon="check">
                         <form method="POST" action="{{ route('notifications.mark-all-read') }}" class="w-full">
                             @csrf
-                            <button type="submit" class="w-full text-left text-sm">Mark all as read</button>
+                            <button type="submit" class="w-full text-left text-sm">{{ __('Mark all as read') }}</button>
                         </form>
+                    </flux:menu.item>
+                    @endif
+                    <flux:menu.item icon="list-bullet" href="{{ route('notifications.index') }}">
+                        <span class="text-sm">{{ __('View all notifications') }}</span>
                     </flux:menu.item>
                 </flux:menu>
             </flux:dropdown>
         </flux:sidebar.nav>
-        @endif
 
         <flux:sidebar.nav>
             @if($isSettings)
