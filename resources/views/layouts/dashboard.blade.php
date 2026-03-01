@@ -50,10 +50,25 @@
                 @endif
             @endif
             @if(auth()->user()->isParent())
-                @if($isDashboard)
+                @php
+                    $isReportCards = $isDashboard;
+                    $isCaMarks = request()->routeIs('report-card.marks') && request()->route('type') === 'ca';
+                    $isExamMarks = request()->routeIs('report-card.marks') && request()->route('type') === 'exam';
+                @endphp
+                @if($isReportCards)
                 <flux:sidebar.item icon="academic-cap" href="{{ route('dashboard') }}#report-cards" current>{{ __('Report cards') }}</flux:sidebar.item>
                 @else
                 <flux:sidebar.item icon="academic-cap" href="{{ route('dashboard') }}#report-cards">{{ __('Report cards') }}</flux:sidebar.item>
+                @endif
+                @if($isCaMarks)
+                <flux:sidebar.item icon="clipboard-document-list" href="{{ route('report-card.marks', ['type' => 'ca']) }}" current>{{ __('View CA results') }}</flux:sidebar.item>
+                @else
+                <flux:sidebar.item icon="clipboard-document-list" href="{{ route('report-card.marks', ['type' => 'ca']) }}">{{ __('View CA results') }}</flux:sidebar.item>
+                @endif
+                @if($isExamMarks)
+                <flux:sidebar.item icon="document-text" href="{{ route('report-card.marks', ['type' => 'exam']) }}" current>{{ __('View exam results') }}</flux:sidebar.item>
+                @else
+                <flux:sidebar.item icon="document-text" href="{{ route('report-card.marks', ['type' => 'exam']) }}">{{ __('View exam results') }}</flux:sidebar.item>
                 @endif
             @endif
         </flux:sidebar.nav>

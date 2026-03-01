@@ -78,6 +78,11 @@ Route::post('notifications/mark-all-read', function () {
 
 // Report card: parents (own children only when published), teachers/headteacher/admin (when approved)
 Route::middleware(['auth'])->group(function () {
+    // More specific route first so /report-card/marks/ca and /report-card/marks/exam are not matched by {student}/{term}
+    Route::get('/report-card/marks/{type}', App\Livewire\Parent\ApprovedMarksView::class)
+        ->name('report-card.marks')
+        ->where('type', 'ca|exam');
+
     Route::get('/report-card/{student}/{term}', [App\Http\Controllers\ReportCardController::class, 'show'])->name('report-card.show');
     Route::get('/report-card/{student}/{term}/pdf', [App\Http\Controllers\ReportCardController::class, 'downloadPdf'])->name('report-card.download');
 });
