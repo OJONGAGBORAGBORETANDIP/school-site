@@ -95,11 +95,16 @@
                             $url = '#';
                             if ($type === 'report_approved' && !empty($data['student_id']) && !empty($data['term_id'])) {
                                 $url = route('report-card.show', ['student' => $data['student_id'], 'term' => $data['term_id']]);
+                            } elseif ($type === 'ca_approved') {
+                                $url = route('report-card.marks', ['type' => 'ca']);
+                            } elseif ($type === 'exam_approved') {
+                                $url = route('report-card.marks', ['type' => 'exam']);
                             } elseif ($type === 'report_rejected' && auth()->user()->isTeacher()) {
                                 $url = route('teacher.marks-entry');
                             }
+                            $icon = $type === 'report_rejected' ? 'exclamation-triangle' : ($type === 'ca_approved' || $type === 'exam_approved' ? 'clipboard-document-list' : 'document-text');
                         @endphp
-                        <flux:menu.item href="{{ $url }}" icon="{{ $type === 'report_rejected' ? 'exclamation-triangle' : 'document-text' }}">
+                        <flux:menu.item href="{{ $url }}" icon="{{ $icon }}">
                             <span class="text-sm">{{ $data['message'] ?? 'Notification' }}</span>
                         </flux:menu.item>
                         @if(!$loop->last)<flux:menu.separator />@endif

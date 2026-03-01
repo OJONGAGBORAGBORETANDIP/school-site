@@ -9,6 +9,7 @@ use App\Models\Term;
 use App\Models\TermReport;
 use App\Models\TeacherAssignment;
 use App\Models\User;
+use App\Notifications\CaExamApprovedNotification;
 use App\Notifications\ReportApprovedNotification;
 use App\Notifications\ReportRejectedNotification;
 use Illuminate\Support\Facades\DB;
@@ -268,6 +269,7 @@ class HeadteacherApprovalService
             ->whereNotNull('ca_submitted_at')
             ->update(['ca_approved_at' => now(), 'ca_rejected_at' => null, 'ca_rejection_reason' => null]);
 
+        $this->notifyParentsOfCaExamApproval($termReportIds, $term, 'ca');
         $this->checkAndCompleteTermApprovals($termReportIds, $term);
         return $count;
     }
@@ -316,6 +318,7 @@ class HeadteacherApprovalService
             ->whereNotNull('exam_submitted_at')
             ->update(['exam_approved_at' => now(), 'exam_rejected_at' => null, 'exam_rejection_reason' => null]);
 
+        $this->notifyParentsOfCaExamApproval($termReportIds, $term, 'exam');
         $this->checkAndCompleteTermApprovals($termReportIds, $term);
         return $count;
     }
@@ -349,6 +352,42 @@ class HeadteacherApprovalService
         User::whereIn('id', $teacherIds)->get()->each(fn (User $u) => $u->notify($notification));
 
         return $count;
+    }
+
+    /**
+     * Notify parents of each student in the given term reports that CA or Exam has been approved.
+     */
+    private function notifyParentsOfCaExamApproval(\Illuminate\Support\Collection $termReportIds, Term $term, string $component): void
+    {
+        if ($termReportIds->isEmpty()) {
+            return;
+        }
+        $termName = $term->name . ' – ' . ($term->schoolYear->name ?? '');
+        TermReport::whereIn('id', $termReportIds)
+            ->with(['enrollment.student.parents.user'])
+            ->get()
+            ->each(function (TermReport $tr) use ($termName, $term, $component) {
+                $student = $tr->enrollment->student ?? null;
+                if (! $student) {
+                    return;
+                }
+                $studentName = trim($student->first_name . ' ' . $student->last_name);
+                if ($student->other_names) {
+                    $studentName .= ' ' . $student->other_names;
+                }
+                $notification = new CaExamApprovedNotification(
+                    $component,
+                    $studentName,
+                    $termName,
+                    $student->id,
+                    $term->id
+                );
+                $student->parents->each(function ($parent) use ($notification) {
+                    if ($parent->user) {
+                        $parent->user->notify($notification);
+                    }
+                });
+            });
     }
 
     /**

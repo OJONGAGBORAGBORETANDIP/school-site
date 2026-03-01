@@ -40,6 +40,10 @@ class NotificationController extends Controller
 
         if ($type === 'report_approved' && ! empty($data['student_id']) && ! empty($data['term_id'])) {
             $url = route('report-card.show', ['student' => $data['student_id'], 'term' => $data['term_id']]);
+        } elseif ($type === 'ca_approved') {
+            $url = route('report-card.marks', ['type' => 'ca']);
+        } elseif ($type === 'exam_approved') {
+            $url = route('report-card.marks', ['type' => 'exam']);
         } elseif ($type === 'report_rejected' && $request->user()->isTeacher()) {
             $url = route('teacher.marks-entry');
         }
