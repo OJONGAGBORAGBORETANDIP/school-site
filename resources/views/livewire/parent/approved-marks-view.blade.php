@@ -17,7 +17,7 @@
                 <select
                     id="school-year"
                     wire:model.live="schoolYearId"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 >
                     <option value="">Select academic year</option>
                     @foreach($schoolYears as $year)
@@ -30,7 +30,7 @@
                 <select
                     id="term"
                     wire:model.live="termId"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                     @if(!$schoolYearId) disabled @endif
                 >
                     <option value="">Select term</option>
@@ -44,7 +44,7 @@
                 <select
                     id="child"
                     wire:model.live="studentId"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                     @if(!$schoolYearId) disabled @endif
                 >
                     <option value="">Select child</option>
