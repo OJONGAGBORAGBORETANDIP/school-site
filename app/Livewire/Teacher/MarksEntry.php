@@ -132,6 +132,7 @@ class MarksEntry extends Component
         $termReportIds = TermReport::whereIn('enrollment_id', $enrollmentIds)
             ->where('term_id', $this->selectedTerm)
             ->pluck('id');
+        // Lock editing when: (1) this subject's scores are submitted for approval, or (2) headmaster has approved this class+term
         $subjectSubmitted = $termReportIds->isNotEmpty() && SubjectReport::whereIn('term_report_id', $termReportIds)
             ->where('subject_id', $this->selectedSubject)
             ->whereNotNull('submitted_at')
@@ -140,8 +141,7 @@ class MarksEntry extends Component
             ->where('term_id', $this->selectedTerm)
             ->where('is_approved_by_headteacher', true)
             ->exists();
-        $resultsPublished = Term::where('id', $this->selectedTerm)->whereNotNull('results_published_at')->exists();
-        $this->isSubmitted = $subjectSubmitted || $termApproved || $resultsPublished;
+        $this->isSubmitted = $subjectSubmitted || $termApproved;
 
         $this->marks = $enrollments->map(function ($enrollment) {
             $termReport = $enrollment->termReports->first();

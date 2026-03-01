@@ -27,7 +27,7 @@ class TermSeeder extends Seeder
                 'name' => '1st Term',
                 'starts_at' => '2024-09-01',
                 'ends_at' => '2024-12-20',
-                'results_published_at' => '2024-12-22',
+                'results_published_at' => null,
             ],
             [
                 'school_year_id' => $currentYear->id,
@@ -35,7 +35,7 @@ class TermSeeder extends Seeder
                 'name' => '2nd Term',
                 'starts_at' => '2025-01-06',
                 'ends_at' => '2025-04-10',
-                'results_published_at' => '2025-04-12',
+                'results_published_at' => null,
             ],
             [
                 'school_year_id' => $currentYear->id,
@@ -43,7 +43,7 @@ class TermSeeder extends Seeder
                 'name' => '3rd Term',
                 'starts_at' => '2025-04-21',
                 'ends_at' => '2025-06-30',
-                'results_published_at' => '2025-07-02',
+                'results_published_at' => null,
             ],
         ];
 

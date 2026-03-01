@@ -10,6 +10,9 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions\BulkAction;
+use Filament\Schemas\Components\Utilities\Get;
+use Closure;
+
 
 class TeacherAssignmentResource extends Resource
 {
@@ -48,6 +51,19 @@ class TeacherAssignmentResource extends Resource
                 ->label('Subject')
                 ->relationship('subject', 'name')
                 ->required()
+                ->rules([
+                    fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+            
+                        $exists = TeacherAssignment::where('teacher_id', $get('teacher_id'))
+                            ->where('class_section_id', $get('class_section_id'))
+                            ->where('subject_id', $value)
+                            ->exists();
+            
+                        if ($exists) {
+                            $fail('This teacher is already assigned to this class and subject.');
+                        }
+                    },
+                ])
                 ->searchable()
                 ->preload(),
         ];
