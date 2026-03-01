@@ -1,4 +1,3 @@
-{{-- Flux sidebar layout: dashboard, marks-entry/result-review (teacher), settings. --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -86,11 +85,14 @@
                 <flux:menu.item icon="user" href="{{ route('change-password') }}">{{ __('Change Password') }}</flux:menu.item>
                 <flux:menu.separator />
                 <flux:menu.item icon="arrow-right-start-on-rectangle">
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
+                    <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full text-left">{{ __('Log out') }}</button>
+                        <button type="submit" class="w-full text-left">
+                            {{ __('Log out') }}
+                        </button>
                     </form>
                 </flux:menu.item>
+                
             </flux:menu>
         </flux:dropdown>
     </flux:header>

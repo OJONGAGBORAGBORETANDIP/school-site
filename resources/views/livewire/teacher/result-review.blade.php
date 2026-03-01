@@ -6,7 +6,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Class section</label>
                 <select
                     wire:model.live="selectedClassSection"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 >
                     <option value="">Select a class section</option>
                     @foreach($classSections as $section)
@@ -18,7 +18,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Term</label>
                 <select
                     wire:model.live="selectedTerm"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 >
                     <option value="">Select a term</option>
                     @foreach($terms as $term)
@@ -30,11 +30,22 @@
     </div>
 
     @if(!empty($reviewSummary))
+        @if($classApprovalStatus === 'pending')
+            <div class="mb-4 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-4 py-3">
+                <span class="text-sm font-medium text-amber-800 dark:text-amber-200">Pending Headmaster Approval</span>
+                <p class="mt-1 text-xs text-amber-700 dark:text-amber-300">All subject scores for this class and term have been submitted. The headmaster can approve (so parents can view report cards) or decline (so you can correct scores).</p>
+            </div>
+        @elseif($classApprovalStatus === 'approved')
+            <div class="mb-4 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-4 py-3">
+                <span class="text-sm font-medium text-green-800 dark:text-green-200">Approved</span>
+                <p class="mt-1 text-xs text-green-700 dark:text-green-300">Report cards for this class and term have been approved. Parents can view and download them. Editing is no longer allowed.</p>
+            </div>
+        @endif
         <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Result review</h3>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Enter or edit marks for each subject via Marks entry, then submit when finalized.
+                    Enter or edit marks for each subject via Marks entry, then submit when finalized. Submitted scores are marked as "Pending Headmaster Approval" until the headmaster approves or declines.
                 </p>
             </div>
             <div class="overflow-x-auto">
@@ -56,7 +67,7 @@
                                 <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $row['total'] }}</td>
                                 <td class="px-4 py-3">
                                     @if($row['status'] === 'submitted')
-                                        <span class="inline-flex items-center rounded-md bg-green-100 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-800 dark:text-green-200">Submitted</span>
+                                        <span class="inline-flex items-center rounded-md bg-amber-100 dark:bg-amber-900/30 px-2 py-1 text-xs font-medium text-amber-800 dark:text-amber-200">Pending Headmaster Approval</span>
                                     @else
                                         <span class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300">Draft</span>
                                     @endif

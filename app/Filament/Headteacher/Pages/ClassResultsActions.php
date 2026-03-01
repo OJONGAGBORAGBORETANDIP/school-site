@@ -69,7 +69,6 @@ class ClassResultsActions extends Page implements HasForms
             ])
             ->statePath('data');
     }
-
     public function generateReports(): void
     {
         $data = $this->form->getState();
@@ -110,15 +109,46 @@ class ClassResultsActions extends Page implements HasForms
             if (!$service->canApproveClassResults($classSectionId, $termId)) {
                 Notification::make()
                     ->title('Cannot approve')
-                    ->body('Not all subject reports for this class and term are submitted.')
+                    ->body('Not all subject reports for this class and term are submitted. Scores must be marked as "Pending Headmaster Approval" by the teacher first.')
                     ->danger()
                     ->send();
                 return;
             }
             $count = $service->approveClassResults($classSectionId, $termId);
-            Notification::make()->title('Class results approved.')->body("{$count} term report(s) approved.")->success()->send();
+            Notification::make()->title('Class results approved.')->body("{$count} term report(s) approved. Parents can now view and download report cards for this class and term.")->success()->send();
         } catch (\Throwable $e) {
             Notification::make()->title('Error')->body($e->getMessage())->danger()->send();
         }
+    }
+
+    public function declineClassResults(): void
+    {
+        $data = $this->form->getState();
+        $classSectionId = (int) ($data['class_section_id'] ?? 0);
+        $termId = (int) ($data['term_id'] ?? 0);
+
+        if (!$classSectionId || !$termId) {
+            Notification::make()->title('Select class section and term.')->danger()->send();
+            return;
+        }
+
+        try {
+            $service = app(HeadteacherApprovalService::class);
+            $count = $service->declineClassResults($classSectionId, $termId);
+            Notification::make()->title('Class results declined.')->body("{$count} term report(s) returned. The teacher can now correct the scores and resubmit.")->warning()->send();
+        } catch (\Throwable $e) {
+            Notification::make()->title('Error')->body($e->getMessage())->danger()->send();
+        }
+    }
+
+    public function getClassStatus(): ?string
+    {
+        $data = $this->form->getRawState();
+        $classSectionId = (int) ($data['class_section_id'] ?? 0);
+        $termId = (int) ($data['term_id'] ?? 0);
+        if (!$classSectionId || !$termId) {
+            return null;
+        }
+        return app(HeadteacherApprovalService::class)->getClassStatus($classSectionId, $termId);
     }
 }

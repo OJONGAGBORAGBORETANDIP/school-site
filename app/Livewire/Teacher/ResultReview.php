@@ -4,6 +4,7 @@ namespace App\Livewire\Teacher;
 
 use App\Models\ClassSection;
 use App\Models\Enrollment;
+use App\Services\HeadteacherApprovalService;
 use App\Models\SubjectReport;
 use App\Models\Term;
 use App\Models\TermReport;
@@ -144,12 +145,28 @@ class ResultReview extends Component
         session()->flash('success', 'Results for this subject have been submitted for head teacher approval.');
     }
 
+    /**
+     * Class-level status for selected class+term: 'pending' when all subjects submitted but not yet approved by headmaster.
+     */
+    public function getClassApprovalStatus(): ?string
+    {
+        if (!$this->selectedClassSection || !$this->selectedTerm) {
+            return null;
+        }
+        return app(HeadteacherApprovalService::class)->getClassStatus(
+            (int) $this->selectedClassSection,
+            (int) $this->selectedTerm
+        );
+    }
+
     public function render()
     {
         $reviewSummary = $this->getReviewSummary();
+        $classApprovalStatus = $this->getClassApprovalStatus();
 
         return view('livewire.teacher.result-review', [
             'reviewSummary' => $reviewSummary,
+            'classApprovalStatus' => $classApprovalStatus,
         ])->layout('layouts.dashboard', [
             'headerTitle' => 'Result review',
             'headerSubtitle' => 'Review all entered results by class and term before submission',

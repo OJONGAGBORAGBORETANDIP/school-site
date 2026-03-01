@@ -7,6 +7,7 @@ use App\Models\TermReport;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -36,7 +37,7 @@ class TermReportResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make('Student Information')
+                Section::make('Student Information')
                     ->schema([
                         Forms\Components\Select::make('enrollment_id')
                             ->relationship('enrollment', 'id', fn (Builder $query) => $query->with(['student', 'classSection']))
@@ -46,7 +47,7 @@ class TermReportResource extends Resource
                             ->relationship('term', 'name')
                             ->disabled(),
                     ])->columns(2),
-                Forms\Components\Section::make('Performance')
+                Section::make('Performance')
                     ->schema([
                         Forms\Components\TextInput::make('average')
                             ->numeric()
@@ -61,7 +62,7 @@ class TermReportResource extends Resource
                             ->numeric()
                             ->disabled(),
                     ])->columns(4),
-                Forms\Components\Section::make('Remarks')
+                Section::make('Remarks')
                     ->schema([
                         Forms\Components\Textarea::make('class_teacher_remark')
                             ->rows(3)

@@ -6,11 +6,11 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Class Section</label>
                 <select
                     wire:model.live="selectedClassSection"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 >
-                    <option value="">Select a class section</option>
+                    <option value="" class="text-lg">Select a class section</option>
                     @foreach($classSections as $section)
-                        <option value="{{ $section['id'] }}">{{ $section['label'] }}</option>
+                        <option value="{{ $section['id'] }}" class="text-xl">{{ $section['label'] }}</option>
                     @endforeach
                 </select>
             </div>
@@ -18,7 +18,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject</label>
                 <select
                     wire:model.live="selectedSubject"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                     {{ empty($subjects) ? 'disabled' : '' }}
                 >
                     <option value="">Select a subject</option>
@@ -31,7 +31,7 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Term</label>
                 <select
                     wire:model.live="selectedTerm"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                    class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 >
                     <option value="">Select a term</option>
                     @foreach($terms as $term)

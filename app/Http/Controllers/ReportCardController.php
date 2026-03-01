@@ -24,16 +24,12 @@ class ReportCardController extends Controller
 
     /**
      * Show report card for a student and term.
-     * Authorization: parent can only view own children; results must be published (or user is staff).
+     * Authorization: parent can only view own children.
+     * Parents: can only view when the term report is approved by headmaster (then they can see and download).
      */
     public function show(Request $request, Student $student, Term $term): View|string
     {
         $this->authorize('viewReportCard', $student);
-
-        // Parents: cannot access unpublished results
-        if (auth()->user()->isParent() && !$this->publishResultsService->isPublished($term->id)) {
-            abort(403, 'Results for this term are not yet published.');
-        }
 
         $enrollment = $student->enrollments()
             ->where('school_year_id', $term->school_year_id)
@@ -44,6 +40,11 @@ class ReportCardController extends Controller
         $termReport = $enrollment->termReports->first();
         if (!$termReport) {
             abort(404, 'No term report found for this student and term.');
+        }
+
+        // Parents: can only view when headmaster has approved this report card
+        if (auth()->user()->isParent() && !$termReport->is_approved_by_headteacher) {
+            abort(403, 'This report card is not yet approved. It will be visible after headmaster approval.');
         }
 
         $attendanceSummary = $this->getAttendanceSummary($enrollment->id, $term->id);
@@ -61,14 +62,11 @@ class ReportCardController extends Controller
 
     /**
      * Download report card as PDF.
+     * Parents: can only download when the term report is approved by headmaster.
      */
     public function downloadPdf(Student $student, Term $term)
     {
         $this->authorize('viewReportCard', $student);
-
-        if (auth()->user()->isParent() && !$this->publishResultsService->isPublished($term->id)) {
-            abort(403, 'Results for this term are not yet published.');
-        }
 
         $enrollment = $student->enrollments()
             ->where('school_year_id', $term->school_year_id)
@@ -79,6 +77,10 @@ class ReportCardController extends Controller
         $termReport = $enrollment->termReports->first();
         if (!$termReport) {
             abort(404, 'No term report found for this student and term.');
+        }
+
+        if (auth()->user()->isParent() && !$termReport->is_approved_by_headteacher) {
+            abort(403, 'This report card is not yet approved. It will be available for download after headmaster approval.');
         }
 
         $attendanceSummary = $this->getAttendanceSummary($enrollment->id, $term->id);
