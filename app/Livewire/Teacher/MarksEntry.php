@@ -299,14 +299,26 @@ class MarksEntry extends Component
     }
 
     /**
-     * Save scores as draft. Teacher can still edit before submitting.
-     * Validates CA (0–30) and Exam (0–70) before saving.
+     * Save scores as draft. Validates CA (0–30) and Exam (0–70). Wrong data is not saved.
      */
     public function saveAsDraft(): void
     {
         $errors = $this->getValidationErrors();
         if (!empty($errors)) {
-            session()->flash('error', 'Please fix the following: ' . implode(' ', $errors));
+            session()->flash('error', 'Draft not saved. Fix the following: ' . implode(' ', $errors));
+            return;
+        }
+        $this->saveMarks(submit: false);
+    }
+
+    /**
+     * Save scores (same as draft). Validates CA (0–30) and Exam (0–70). Wrong data is not saved.
+     */
+    public function save(): void
+    {
+        $errors = $this->getValidationErrors();
+        if (!empty($errors)) {
+            session()->flash('error', 'Marks not saved. Fix the following: ' . implode(' ', $errors));
             return;
         }
         $this->saveMarks(submit: false);
@@ -339,7 +351,7 @@ class MarksEntry extends Component
 
         $errors = $this->getValidationErrors();
         if (!empty($errors)) {
-            session()->flash('error', 'Invalid marks. ' . implode(' ', $errors));
+            session()->flash('error', 'Cannot save: invalid marks. ' . implode(' ', $errors));
             return;
         }
 
@@ -389,9 +401,9 @@ class MarksEntry extends Component
         });
 
         if ($submit) {
-            session()->flash('success', 'Scores for this subject saved and submitted for head teacher approval. You can still enter and submit other subjects.');
+            session()->flash('success', 'Scores saved and submitted for head teacher approval. Parents will be able to view report cards after the headmaster approves.');
         } else {
-            session()->flash('success', 'Scores saved as draft. You can edit and submit later.');
+            session()->flash('success', 'Draft saved successfully. Marks are validated (CA 0–30, Exam 0–70). You can edit and submit for approval when ready.');
         }
         $this->loadStudents();
     }
@@ -423,6 +435,7 @@ class MarksEntry extends Component
             'gradingScales' => $gradingScales,
             'activeTermId' => $activeTermId,
             'canEdit' => $canEdit,
+            'validationErrors' => $this->getValidationErrors(),
         ])->layout('layouts.dashboard', [
             'headerTitle' => 'Marks entry',
             'headerSubtitle' => 'Enter and manage subject marks by class and term',

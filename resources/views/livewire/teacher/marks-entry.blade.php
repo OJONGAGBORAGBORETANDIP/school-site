@@ -175,7 +175,7 @@
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                     @if(!empty($validationErrors))
                         <div class="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
-                            <strong>Accuracy check:</strong> Fix the following before submitting:
+                            <strong>Validation failed:</strong> CA must be 0–30, Exam must be 0–70. Fix the following before saving or submitting:
                             <ul class="mt-1 list-disc list-inside">
                                 @foreach($validationErrors as $err)
                                     <li>{{ $err }}</li>
@@ -184,7 +184,7 @@
                         </div>
                     @else
                         <div class="text-sm text-gray-600 dark:text-gray-400">
-                            <strong>Accuracy check:</strong> CA 0–30, Exam 0–70.
+                            <strong>Validation:</strong> CA 0–30, Exam 0–70. Both buttons check these limits before saving.
                         </div>
                     @endif
                     <div class="flex justify-end gap-3">
@@ -197,7 +197,7 @@
                         </button>
                         <button
                             type="button"
-                            wire:click="saveAsDraft"
+                            wire:click="save"
                             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             Save
