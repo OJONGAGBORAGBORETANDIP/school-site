@@ -174,7 +174,8 @@ class MarksEntry extends Component
     {
         if (str_contains($key, 'ca_mark') || str_contains($key, 'exam_mark')) {
             $parts = explode('.', $key);
-            $index = (int) $parts[1];
+            // Key may be "0.ca_mark" (2 parts) or "marks.0.ca_mark" (3 parts). Row index is the numeric segment.
+            $index = count($parts) === 3 ? (int) $parts[1] : (int) $parts[0];
 
             if (isset($this->marks[$index])) {
                 $caMark = (float) ($this->marks[$index]['ca_mark'] ?? 0);
