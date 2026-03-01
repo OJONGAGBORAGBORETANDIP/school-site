@@ -1,7 +1,7 @@
 <div class="space-y-6">
     <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 space-y-4 border border-gray-200 dark:border-gray-700">
-        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Select Class, Subject & Term</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Select Class, Subject, Term & Mark Type</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Class Section</label>
                 <select
@@ -38,6 +38,17 @@
                         <option value="{{ $term['id'] }}">{{ $term['label'] }}</option>
                     @endforeach
                 </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mark entry type</label>
+                <select
+                    wire:model.live="markEntryType"
+                    class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                >
+                    <option value="ca">CA marks (out of 30)</option>
+                    <option value="exam">Exam marks (out of 70)</option>
+                </select>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Choose which marks you are entering.</p>
             </div>
         </div>
     </div>
@@ -95,7 +106,11 @@
                         @endif
                     </h3>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        CA (Continuous Assessment) out of 30, Exam out of 70. Final score = CA + Exam (out of 100). Grade and remark are assigned from the scale below.
+                        @if($markEntryType === 'ca')
+                            Entering <strong>CA marks (out of 30)</strong>. Exam column is read-only. Final score = CA + Exam.
+                        @else
+                            Entering <strong>Exam marks (out of 70)</strong>. CA column is read-only. Final score = CA + Exam.
+                        @endif
                     </p>
                 </div>
                 @if($isSubmitted)
@@ -123,8 +138,9 @@
                             <tr>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $mark['student_name'] }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $mark['admission_number'] }}</td>
+                                {{-- CA column: editable only when markEntryType is 'ca' and canEdit --}}
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @if(!$canEdit)
+                                    @if(!$canEdit || $markEntryType !== 'ca')
                                         <span class="text-sm text-gray-900 dark:text-gray-100">{{ $mark['ca_mark'] !== '' && $mark['ca_mark'] !== null ? number_format((float)$mark['ca_mark'], 2) : '-' }}</span>
                                     @else
                                         <input
@@ -134,11 +150,13 @@
                                             max="30"
                                             wire:model.live="marks.{{ $index }}.ca_mark"
                                             class="w-20 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                            placeholder="0–30"
                                         />
                                     @endif
                                 </td>
+                                {{-- Exam column: editable only when markEntryType is 'exam' and canEdit --}}
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @if(!$canEdit)
+                                    @if(!$canEdit || $markEntryType !== 'exam')
                                         <span class="text-sm text-gray-900 dark:text-gray-100">{{ $mark['exam_mark'] !== '' && $mark['exam_mark'] !== null ? number_format((float)$mark['exam_mark'], 2) : '-' }}</span>
                                     @else
                                         <input
@@ -148,6 +166,7 @@
                                             max="70"
                                             wire:model.live="marks.{{ $index }}.exam_mark"
                                             class="w-20 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                            placeholder="0–70"
                                         />
                                     @endif
                                 </td>

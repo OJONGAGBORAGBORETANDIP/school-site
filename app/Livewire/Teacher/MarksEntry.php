@@ -23,6 +23,9 @@ class MarksEntry extends Component
 
     public $marks = [];
 
+    /** Which marks to enter: 'ca' (Continuous Assessment, out of 30) or 'exam' (out of 70). */
+    public $markEntryType = 'ca';
+
     /** Whether the current class+term has been submitted for approval (scores read-only). */
     public $isSubmitted = false;
 
