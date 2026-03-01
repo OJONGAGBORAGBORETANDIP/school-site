@@ -34,11 +34,13 @@ class HeadteacherPanelProvider extends PanelProvider
             ])
             ->authGuard('web')
             ->authPasswordBroker('users')
+            ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Headteacher/Resources'), for: 'App\Filament\Headteacher\Resources')
             ->discoverPages(in: app_path('Filament/Headteacher/Pages'), for: 'App\Filament\Headteacher\Pages')
             ->pages([
                 \App\Filament\Headteacher\Pages\HeadteacherDashboard::class,
                 \App\Filament\Headteacher\Pages\ClassResultsActions::class,
+                \App\Filament\Headteacher\Pages\PendingApprovals::class,
                 \App\Filament\Headteacher\Pages\PerformanceAnalytics::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Headteacher/Widgets'), for: 'App\Filament\Headteacher\Widgets')

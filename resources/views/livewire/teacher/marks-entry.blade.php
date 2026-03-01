@@ -138,10 +138,13 @@
                             <tr>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $mark['student_name'] }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $mark['admission_number'] }}</td>
-                                {{-- CA column: editable only when markEntryType is 'ca' and canEdit --}}
+                                {{-- CA column: editable when markEntryType is 'ca' and row allows edit --}}
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @if(!$canEdit || $markEntryType !== 'ca')
+                                    @if(!$canEdit || $markEntryType !== 'ca' || !($mark['can_edit_ca'] ?? true))
                                         <span class="text-sm text-gray-900 dark:text-gray-100">{{ $mark['ca_mark'] !== '' && $mark['ca_mark'] !== null ? number_format((float)$mark['ca_mark'], 2) : '-' }}</span>
+                                        @if(!empty($mark['ca_rejection_reason']))
+                                            <p class="text-xs text-red-600 dark:text-red-400 mt-0.5" title="Rejection reason">{{ Str::limit($mark['ca_rejection_reason'], 30) }}</p>
+                                        @endif
                                     @else
                                         <input
                                             type="number"
@@ -154,10 +157,13 @@
                                         />
                                     @endif
                                 </td>
-                                {{-- Exam column: editable only when markEntryType is 'exam' and canEdit --}}
+                                {{-- Exam column: editable when markEntryType is 'exam' and row allows edit --}}
                                 <td class="px-4 py-3 whitespace-nowrap">
-                                    @if(!$canEdit || $markEntryType !== 'exam')
+                                    @if(!$canEdit || $markEntryType !== 'exam' || !($mark['can_edit_exam'] ?? true))
                                         <span class="text-sm text-gray-900 dark:text-gray-100">{{ $mark['exam_mark'] !== '' && $mark['exam_mark'] !== null ? number_format((float)$mark['exam_mark'], 2) : '-' }}</span>
+                                        @if(!empty($mark['exam_rejection_reason']))
+                                            <p class="text-xs text-red-600 dark:text-red-400 mt-0.5" title="Rejection reason">{{ Str::limit($mark['exam_rejection_reason'], 30) }}</p>
+                                        @endif
                                     @else
                                         <input
                                             type="number"
@@ -170,8 +176,8 @@
                                         />
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $mark['total_mark'] ? number_format($mark['total_mark'], 2) : '-' }}</td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $mark['grade'] ?? '-' }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $mark['total_mark'] !== '' && $mark['total_mark'] !== null ? number_format((float)$mark['total_mark'], 2) : '-' }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ ($mark['total_mark'] ?? '') !== '' && ($mark['total_mark'] ?? null) !== null ? ($mark['grade'] ?? '-') : '-' }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap">
                                     @if(!$canEdit)
                                         <span class="text-sm text-gray-600 dark:text-gray-400">{{ $mark['teacher_comment'] ?? '-' }}</span>
@@ -206,7 +212,7 @@
                             <strong>Validation:</strong> CA 0–30, Exam 0–70. Both buttons check these limits before saving.
                         </div>
                     @endif
-                    <div class="flex justify-end gap-3">
+                    <div class="flex flex-wrap justify-end gap-3">
                         <button
                             type="button"
                             wire:click="saveAsDraft"
@@ -220,6 +226,22 @@
                             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             Save
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="submitCaForApproval"
+                            wire:confirm="Submit CA marks for head teacher approval? You will not be able to edit CA until headteacher approves or rejects."
+                            class="inline-flex items-center px-4 py-2 border border-amber-300 dark:border-amber-600 text-sm font-medium rounded-md shadow-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+                        >
+                            Submit CA for approval
+                        </button>
+                        <button
+                            type="button"
+                            wire:click="submitExamForApproval"
+                            wire:confirm="Submit Exam marks for head teacher approval? You will not be able to edit Exam until headteacher approves or rejects."
+                            class="inline-flex items-center px-4 py-2 border border-amber-300 dark:border-amber-600 text-sm font-medium rounded-md shadow-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+                        >
+                            Submit Exam for approval
                         </button>
                     </div>
                 </div>

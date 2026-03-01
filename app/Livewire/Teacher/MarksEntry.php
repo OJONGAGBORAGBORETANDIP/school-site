@@ -135,18 +135,13 @@ class MarksEntry extends Component
         $termReportIds = TermReport::whereIn('enrollment_id', $enrollmentIds)
             ->where('term_id', $this->selectedTerm)
             ->pluck('id');
-        // Lock editing when: (1) this subject's scores are submitted for approval, or (2) headmaster has approved this class+term
-        $subjectSubmitted = $termReportIds->isNotEmpty() && SubjectReport::whereIn('term_report_id', $termReportIds)
-            ->where('subject_id', $this->selectedSubject)
-            ->whereNotNull('submitted_at')
-            ->exists();
         $termApproved = TermReport::whereIn('enrollment_id', $enrollmentIds)
             ->where('term_id', $this->selectedTerm)
             ->where('is_approved_by_headteacher', true)
             ->exists();
-        $this->isSubmitted = $subjectSubmitted || $termApproved;
+        $this->isSubmitted = $termApproved;
 
-        $this->marks = $enrollments->map(function ($enrollment) {
+        $this->marks = $enrollments->map(function ($enrollment) use ($termApproved) {
             $termReport = $enrollment->termReports->first();
             $subjectReport = null;
 
@@ -155,6 +150,9 @@ class MarksEntry extends Component
                     ->where('subject_id', $this->selectedSubject)
                     ->first();
             }
+
+            $canEditCa = $subjectReport ? $subjectReport->canEditCa($termApproved) : !$termApproved;
+            $canEditExam = $subjectReport ? $subjectReport->canEditExam($termApproved) : !$termApproved;
 
             return [
                 'enrollment_id' => $enrollment->id,
@@ -169,6 +167,10 @@ class MarksEntry extends Component
                 'teacher_comment' => $subjectReport?->teacher_comment ?? '',
                 'term_report_id' => $termReport?->id,
                 'subject_report_id' => $subjectReport?->id,
+                'can_edit_ca' => $canEditCa,
+                'can_edit_exam' => $canEditExam,
+                'ca_rejection_reason' => $subjectReport?->ca_rejection_reason,
+                'exam_rejection_reason' => $subjectReport?->exam_rejection_reason,
             ];
         })->toArray();
     }
@@ -202,11 +204,12 @@ class MarksEntry extends Component
                     $examMark = 0;
                 }
 
-                if ($caMark > 0 || $examMark > 0) {
-                    // Final score = CA (out of 30) + Exam (out of 70) = total out of 100
+                // Only set total and grade when BOTH CA and Exam are present (teacher may enter only one)
+                $caPresent = ($this->marks[$index]['ca_mark'] ?? '') !== '' && ($this->marks[$index]['ca_mark'] ?? null) !== null;
+                $examPresent = ($this->marks[$index]['exam_mark'] ?? '') !== '' && ($this->marks[$index]['exam_mark'] ?? null) !== null;
+                if ($caPresent && $examPresent) {
                     $totalMark = $caMark + $examMark;
                     $this->marks[$index]['total_mark'] = round($totalMark, 2);
-
                     $gradeInfo = \App\Models\GradingScale::getGradeForMark($totalMark);
                     if ($gradeInfo) {
                         $this->marks[$index]['grade'] = $gradeInfo['grade'];
@@ -328,17 +331,97 @@ class MarksEntry extends Component
     }
 
     /**
-     * Save scores and submit for approval by head teacher. Scores become read-only.
-     * Validates accuracy of marks before allowing submit.
+     * Submit CA marks only for head teacher approval. Validates CA 0–30.
      */
-    public function submitForApproval(): void
+    public function submitCaForApproval(): void
     {
-        $errors = $this->getValidationErrors();
+        $errors = $this->getValidationErrorsForCa();
         if (!empty($errors)) {
-            session()->flash('error', 'Please fix the following before submitting: ' . implode(' ', $errors));
+            session()->flash('error', 'Cannot submit CA. ' . implode(' ', $errors));
             return;
         }
-        $this->saveMarks(submit: true);
+        $this->saveMarks(submit: false); // ensure data is saved
+        $enrollmentIds = Enrollment::where('class_section_id', $this->selectedClassSection)
+            ->where('is_active', true)
+            ->pluck('id');
+        $termReportIds = TermReport::whereIn('enrollment_id', $enrollmentIds)
+            ->where('term_id', $this->selectedTerm)
+            ->pluck('id');
+        SubjectReport::whereIn('term_report_id', $termReportIds)
+            ->where('subject_id', $this->selectedSubject)
+            ->whereNotNull('ca_mark')
+            ->update([
+                'ca_submitted_at' => now(),
+                'ca_rejected_at' => null,
+                'ca_rejection_reason' => null,
+            ]);
+        session()->flash('success', 'CA marks submitted for head teacher approval. You can still enter or edit Exam marks.');
+        $this->loadStudents();
+    }
+
+    /**
+     * Submit Exam marks only for head teacher approval. Validates Exam 0–70.
+     */
+    public function submitExamForApproval(): void
+    {
+        $errors = $this->getValidationErrorsForExam();
+        if (!empty($errors)) {
+            session()->flash('error', 'Cannot submit Exam. ' . implode(' ', $errors));
+            return;
+        }
+        $this->saveMarks(submit: false);
+        $enrollmentIds = Enrollment::where('class_section_id', $this->selectedClassSection)
+            ->where('is_active', true)
+            ->pluck('id');
+        $termReportIds = TermReport::whereIn('enrollment_id', $enrollmentIds)
+            ->where('term_id', $this->selectedTerm)
+            ->pluck('id');
+        SubjectReport::whereIn('term_report_id', $termReportIds)
+            ->where('subject_id', $this->selectedSubject)
+            ->whereNotNull('exam_mark')
+            ->update([
+                'exam_submitted_at' => now(),
+                'exam_rejected_at' => null,
+                'exam_rejection_reason' => null,
+            ]);
+        session()->flash('success', 'Exam marks submitted for head teacher approval. You can still enter or edit CA marks.');
+        $this->loadStudents();
+    }
+
+    /** Validation errors for CA only (0–30). */
+    public function getValidationErrorsForCa(): array
+    {
+        $errors = [];
+        foreach ($this->marks as $index => $mark) {
+            $ca = $mark['ca_mark'] ?? '';
+            if ($ca === '' || $ca === null) {
+                continue;
+            }
+            $num = (float) $ca;
+            if ($num < 0 || $num > 30) {
+                $name = $mark['student_name'] ?? 'Row ' . ($index + 1);
+                $errors[] = "CA for {$name} must be 0–30.";
+            }
+        }
+        return $errors;
+    }
+
+    /** Validation errors for Exam only (0–70). */
+    public function getValidationErrorsForExam(): array
+    {
+        $errors = [];
+        foreach ($this->marks as $index => $mark) {
+            $exam = $mark['exam_mark'] ?? '';
+            if ($exam === '' || $exam === null) {
+                continue;
+            }
+            $num = (float) $exam;
+            if ($num < 0 || $num > 70) {
+                $name = $mark['student_name'] ?? 'Row ' . ($index + 1);
+                $errors[] = "Exam for {$name} must be 0–70.";
+            }
+        }
+        return $errors;
     }
 
     /**

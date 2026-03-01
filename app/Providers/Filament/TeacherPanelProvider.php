@@ -33,6 +33,7 @@ class TeacherPanelProvider extends PanelProvider
             ])
             ->authGuard('web')
             ->authPasswordBroker('users')
+            ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Teacher/Resources'), for: 'App\Filament\Teacher\Resources')
             ->discoverPages(in: app_path('Filament/Teacher/Pages'), for: 'App\Filament\Teacher\Pages')
             ->pages([

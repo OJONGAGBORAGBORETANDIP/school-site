@@ -43,6 +43,20 @@ class TermReport extends Model
         return $this->submitted_at !== null;
     }
 
+    /** Whether all subject reports have each component either not entered or approved (report card viewable by parent). */
+    public function isFullyApproved(): bool
+    {
+        $reports = $this->subjectReports;
+        if ($reports->isEmpty()) {
+            return false;
+        }
+        return $reports->every(function ($sr) {
+            $caOk = $sr->ca_mark === null || $sr->ca_approved_at !== null;
+            $examOk = $sr->exam_mark === null || $sr->exam_approved_at !== null;
+            return $caOk && $examOk;
+        });
+    }
+
     public function enrollment(): BelongsTo
     {
         return $this->belongsTo(Enrollment::class);
