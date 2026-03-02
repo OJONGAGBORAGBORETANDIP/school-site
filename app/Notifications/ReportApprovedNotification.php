@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ReportApprovedNotification extends Notification implements ShouldQueue
@@ -19,7 +20,16 @@ class ReportApprovedNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $message = "Report card for {$this->studentName} ({$this->termName}) has been released. You can now view and download it from the portal.";
+
+        return (new MailMessage())
+            ->subject("Report card released for {$this->studentName}")
+            ->line($message);
     }
 
     public function toArray(object $notifiable): array

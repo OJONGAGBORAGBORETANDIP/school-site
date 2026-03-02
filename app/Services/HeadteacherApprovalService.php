@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Notifications\CaExamApprovedNotification;
 use App\Notifications\ReportApprovedNotification;
 use App\Notifications\ReportRejectedNotification;
+use App\Notifications\TeacherCaExamApprovedNotification;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -270,6 +271,7 @@ class HeadteacherApprovalService
             ->update(['ca_approved_at' => now(), 'ca_rejected_at' => null, 'ca_rejection_reason' => null]);
 
         $this->notifyParentsOfCaExamApproval($termReportIds, $term, 'ca');
+        $this->notifyTeachersOfCaExamApproval($classSectionId, $subjectId, $classLabel, $termName, 'ca');
         $this->checkAndCompleteTermApprovals($termReportIds, $term);
         return $count;
     }
@@ -312,6 +314,10 @@ class HeadteacherApprovalService
     {
         $termReportIds = $this->getTermReportIdsForClass($classSectionId, $termId);
         $term = Term::with('schoolYear')->findOrFail($termId);
+        $subject = Subject::findOrFail($subjectId);
+        $classSection = ClassSection::with('schoolClass')->findOrFail($classSectionId);
+        $classLabel = $classSection->label . ' (' . ($classSection->schoolClass->name ?? '') . ')';
+        $termName = $term->name . ' – ' . ($term->schoolYear->name ?? '');
 
         $count = SubjectReport::whereIn('term_report_id', $termReportIds)
             ->where('subject_id', $subjectId)
@@ -319,6 +325,7 @@ class HeadteacherApprovalService
             ->update(['exam_approved_at' => now(), 'exam_rejected_at' => null, 'exam_rejection_reason' => null]);
 
         $this->notifyParentsOfCaExamApproval($termReportIds, $term, 'exam');
+        $this->notifyTeachersOfCaExamApproval($classSectionId, $subjectId, $classLabel, $termName, 'exam');
         $this->checkAndCompleteTermApprovals($termReportIds, $term);
         return $count;
     }
@@ -388,6 +395,32 @@ class HeadteacherApprovalService
                     }
                 });
             });
+    }
+
+    /**
+     * Notify all teachers assigned to this class section and subject that CA or Exam marks were approved.
+     */
+    private function notifyTeachersOfCaExamApproval(int $classSectionId, int $subjectId, string $classLabel, string $termName, string $component): void
+    {
+        $teacherIds = TeacherAssignment::where('class_section_id', $classSectionId)
+            ->where('subject_id', $subjectId)
+            ->pluck('teacher_id')
+            ->unique();
+
+        if ($teacherIds->isEmpty()) {
+            return;
+        }
+
+        $subject = Subject::find($subjectId);
+        if (! $subject) {
+            return;
+        }
+
+        $notification = new TeacherCaExamApprovedNotification($component, $subject->name, $classLabel, $termName);
+
+        User::whereIn('id', $teacherIds)->get()->each(function (User $user) use ($notification) {
+            $user->notify($notification);
+        });
     }
 
     /**

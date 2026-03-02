@@ -21,7 +21,18 @@ class ReportRejectedNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $subjectPrefix = $this->type === 'Exam' ? 'Exam marks rejected' : 'CA marks rejected';
+        $subject = "{$subjectPrefix} – {$this->subjectName}";
+
+        return (new MailMessage())
+            ->subject($subject)
+            ->line("Your {$this->type} result for {$this->subjectName} ({$this->classLabel}, {$this->termName}) has been rejected by the headteacher.")
+            ->line("Reason: {$this->reason}");
     }
 
     public function toArray(object $notifiable): array

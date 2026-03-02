@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
@@ -24,7 +25,18 @@ class CaExamApprovedNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $label = $this->component === 'exam' ? 'Exam results' : 'CA results';
+        $componentLabel = $this->component === 'exam' ? 'Exam' : 'CA';
+        $message = "{$label} for {$this->studentName} ({$this->termName}) have been released. You can view them in the portal.";
+
+        return (new MailMessage())
+            ->subject("{$componentLabel} released for {$this->studentName}")
+            ->line($message);
     }
 
     public function toArray(object $notifiable): array
