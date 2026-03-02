@@ -98,7 +98,7 @@
                 <div>
                     <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
                         @if($isSubmitted)
-                            Previously entered scores (submitted for approval)
+                            Approved – view only (this subject)
                         @elseif(!$canEdit)
                             Past term – view only
                         @else
@@ -114,7 +114,7 @@
                     </p>
                 </div>
                 @if($isSubmitted)
-                    <span class="inline-flex items-center rounded-md bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-sm font-medium text-amber-800 dark:text-amber-200">Submitted – view only</span>
+                    <span class="inline-flex items-center rounded-md bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-sm font-medium text-amber-800 dark:text-amber-200">Approved – view only</span>
                 @elseif(!$canEdit)
                     <span class="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300">Past term – read only</span>
                 @endif

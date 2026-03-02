@@ -73,19 +73,19 @@ class SubjectReport extends Model
         return $this->exam_submitted_at !== null && $this->exam_rejected_at === null && $this->exam_approved_at === null;
     }
 
-    /** Teacher can edit CA if not submitted or if rejected (can resubmit). */
-    public function canEditCa(bool $termApproved): bool
+    /** Teacher can edit CA only if CA has not been approved for this subject. Once approved, read-only. */
+    public function canEditCa(): bool
     {
-        if ($termApproved) {
+        if ($this->ca_approved_at !== null) {
             return false;
         }
         return $this->ca_submitted_at === null || $this->ca_rejected_at !== null;
     }
 
-    /** Teacher can edit Exam if not submitted or if rejected. */
-    public function canEditExam(bool $termApproved): bool
+    /** Teacher can edit Exam only if Exam has not been approved for this subject. Once approved, read-only. */
+    public function canEditExam(): bool
     {
-        if ($termApproved) {
+        if ($this->exam_approved_at !== null) {
             return false;
         }
         return $this->exam_submitted_at === null || $this->exam_rejected_at !== null;

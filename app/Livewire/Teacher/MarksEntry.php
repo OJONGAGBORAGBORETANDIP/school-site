@@ -135,13 +135,8 @@ class MarksEntry extends Component
         $termReportIds = TermReport::whereIn('enrollment_id', $enrollmentIds)
             ->where('term_id', $this->selectedTerm)
             ->pluck('id');
-        $termApproved = TermReport::whereIn('enrollment_id', $enrollmentIds)
-            ->where('term_id', $this->selectedTerm)
-            ->where('is_approved_by_headteacher', true)
-            ->exists();
-        $this->isSubmitted = $termApproved;
 
-        $this->marks = $enrollments->map(function ($enrollment) use ($termApproved) {
+        $this->marks = $enrollments->map(function ($enrollment) {
             $termReport = $enrollment->termReports->first();
             $subjectReport = null;
 
@@ -151,8 +146,8 @@ class MarksEntry extends Component
                     ->first();
             }
 
-            $canEditCa = $subjectReport ? $subjectReport->canEditCa($termApproved) : !$termApproved;
-            $canEditExam = $subjectReport ? $subjectReport->canEditExam($termApproved) : !$termApproved;
+            $canEditCa = $subjectReport ? $subjectReport->canEditCa() : true;
+            $canEditExam = $subjectReport ? $subjectReport->canEditExam() : true;
 
             return [
                 'enrollment_id' => $enrollment->id,
@@ -173,6 +168,10 @@ class MarksEntry extends Component
                 'exam_rejection_reason' => $subjectReport?->exam_rejection_reason,
             ];
         })->toArray();
+
+        // Only treat as "submitted view-only" when this subject has no editable CA/Exam (all approved or submitted and pending).
+        $hasAnyEditable = collect($this->marks)->contains(fn ($m) => ($m['can_edit_ca'] ?? false) || ($m['can_edit_exam'] ?? false));
+        $this->isSubmitted = count($this->marks) > 0 && !$hasAnyEditable;
     }
 
     public function updatedMarks($value, $key): void
@@ -465,11 +464,27 @@ class MarksEntry extends Component
                     ]
                 );
 
+                $existingReport = SubjectReport::where('term_report_id', $termReport->id)
+                    ->where('subject_id', $this->selectedSubject)
+                    ->first();
+
                 $data = [
-                    'ca_mark' => $markData['ca_mark'] ?? null,
-                    'exam_mark' => $markData['exam_mark'] ?? null,
                     'teacher_comment' => $markData['teacher_comment'] ?? null,
                 ];
+                if ($existingReport?->canEditCa()) {
+                    $data['ca_mark'] = $markData['ca_mark'] ?? null;
+                } elseif ($existingReport) {
+                    $data['ca_mark'] = $existingReport->ca_mark;
+                } else {
+                    $data['ca_mark'] = $markData['ca_mark'] ?? null;
+                }
+                if ($existingReport?->canEditExam()) {
+                    $data['exam_mark'] = $markData['exam_mark'] ?? null;
+                } elseif ($existingReport) {
+                    $data['exam_mark'] = $existingReport->exam_mark;
+                } else {
+                    $data['exam_mark'] = $markData['exam_mark'] ?? null;
+                }
                 if ($submit) {
                     $data['submitted_at'] = now();
                 }
@@ -513,9 +528,9 @@ class MarksEntry extends Component
     {
         $gradingScales = GradingScale::orderBy('min_mark', 'desc')->get();
         $activeTermId = static::getActiveTermId();
-        $canEdit = !$this->isSubmitted
-            && $activeTermId
-            && (string) $this->selectedTerm === (string) $activeTermId;
+        $isActiveTerm = $activeTermId && (string) $this->selectedTerm === (string) $activeTermId;
+        $hasAnyEditable = collect($this->marks)->contains(fn ($m) => ($m['can_edit_ca'] ?? false) || ($m['can_edit_exam'] ?? false));
+        $canEdit = $isActiveTerm && $hasAnyEditable;
 
         return view('livewire.teacher.marks-entry', [
             'gradingScales' => $gradingScales,
