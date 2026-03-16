@@ -9,6 +9,19 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+
+    public function register(Request $request){
+        $credentials = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users|max:255',
+            'password' => 'required|string|min:8',
+        ]);
+        // dd($credentials);
+        $credentials['password'] = Hash::make($credentials['password']);
+        $user = User::create($credentials);
+        Auth::login($user);
+        return redirect()->route('dashboard');
+    }
     public function login(Request $request){
         // Basic validation for login (do NOT enforce unique email here)
         $credentials = $request->validate([
@@ -28,4 +41,6 @@ class AuthController extends Controller
 
         return redirect()->route('dashboard');
     }
+
+    
 }

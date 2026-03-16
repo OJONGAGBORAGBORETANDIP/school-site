@@ -11,6 +11,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::post('/login-user', [AuthController::class, 'login'])->name('login-user');
+Route::post('/register-user', [AuthController::class, 'register'])->name('register-user');
 
 // Single dashboard: same layout (sidebar + nav + main) for all; content by role (teacher / parent).
 Route::get('dashboard', function () {
