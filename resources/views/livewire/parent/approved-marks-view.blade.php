@@ -3,7 +3,7 @@
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 @if($type === 'ca')
-                    View CA results
+                    View Sequence results
                 @else
                     View exam results
                 @endif
@@ -64,7 +64,7 @@
                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Subject</th>
                             <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 @if($type === 'ca')
-                                    CA mark (out of 30)
+                                    Sequence mark (out of 30)
                                 @else
                                     Exam mark (out of 70)
                                 @endif
@@ -80,7 +80,7 @@
                         @empty
                         <tr>
                             <td colspan="2" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                No approved {{ $type === 'ca' ? 'CA' : 'exam' }} results for this child and term yet. Results will appear here once the headteacher approves them.
+                                No approved {{ $type === 'ca' ? 'Sequence' : 'exam' }} results for this child and term yet. Results will appear here once the headteacher approves them.
                             </td>
                         </tr>
                         @endforelse

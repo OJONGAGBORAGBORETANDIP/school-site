@@ -45,7 +45,7 @@
                     wire:model.live="markEntryType"
                     class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 >
-                    <option value="ca">CA marks (out of 30)</option>
+                    <option value="ca">Sequence marks (out of 30)</option>
                     <option value="exam">Exam marks (out of 70)</option>
                 </select>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Choose which marks you are entering.</p>
@@ -107,9 +107,9 @@
                     </h3>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         @if($markEntryType === 'ca')
-                            Entering <strong>CA marks (out of 30)</strong>. Exam column is read-only. Final score = CA + Exam.
+                            Entering <strong>Sequence marks (out of 30)</strong>. Exam column is read-only. Final score = CA + Exam.
                         @else
-                            Entering <strong>Exam marks (out of 70)</strong>. CA column is read-only. Final score = CA + Exam.
+                            Entering <strong>Exam marks (out of 70)</strong>. Sequence column is read-only. Final score = Sequence + Exam.
                         @endif
                     </p>
                 </div>
@@ -126,7 +126,7 @@
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Admission No.</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">CA (out of 30)</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sequence (out of 30)</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Exam (out of 70)</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Grade</th>
@@ -138,7 +138,7 @@
                             <tr>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $mark['student_name'] }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $mark['admission_number'] }}</td>
-                                {{-- CA column: editable when markEntryType is 'ca' and row allows edit --}}
+                                {{-- Sequence column: editable when markEntryType is 'ca' and row allows edit --}}
                                 <td class="px-4 py-3 whitespace-nowrap">
                                     @if(!$canEdit || $markEntryType !== 'ca' || !($mark['can_edit_ca'] ?? true))
                                         <span class="text-sm text-gray-900 dark:text-gray-100">{{ $mark['ca_mark'] !== '' && $mark['ca_mark'] !== null ? number_format((float)$mark['ca_mark'], 2) : '-' }}</span>
@@ -200,7 +200,7 @@
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                     @if(!empty($validationErrors))
                         <div class="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
-                            <strong>Validation failed:</strong> CA must be 0–30, Exam must be 0–70. Fix the following before saving or submitting:
+                            <strong>Validation failed:</strong> Sequence must be 0–30, Exam must be 0–70. Fix the following before saving or submitting:
                             <ul class="mt-1 list-disc list-inside">
                                 @foreach($validationErrors as $err)
                                     <li>{{ $err }}</li>
@@ -209,7 +209,7 @@
                         </div>
                     @else
                         <div class="text-sm text-gray-600 dark:text-gray-400">
-                            <strong>Validation:</strong> CA 0–30, Exam 0–70. Both buttons check these limits before saving.
+                            <strong>Validation:</strong> Sequence 0–30, Exam 0–70. Both buttons check these limits before saving.
                         </div>
                     @endif
                     <div class="flex flex-wrap justify-end gap-3">
@@ -230,7 +230,7 @@
                         <button
                             type="button"
                             wire:click="submitCaForApproval"
-                            wire:confirm="Submit CA marks for head teacher approval? You will not be able to edit CA until headteacher approves or rejects."
+                            wire:confirm="Submit Sequence marks for head teacher approval? You will not be able to edit Sequence until headteacher approves or rejects."
                             class="inline-flex items-center px-4 py-2 border border-amber-300 dark:border-amber-600 text-sm font-medium rounded-md shadow-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
                         >
                             Submit CA for approval

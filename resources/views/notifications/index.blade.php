@@ -37,10 +37,10 @@
                     $actionLabel = 'View report card';
                 } elseif ($type === 'ca_approved') {
                     $redirect = route('report-card.marks', ['type' => 'ca']);
-                    $actionLabel = 'View CA results';
+                    $actionLabel = 'View Sequence results';
                 } elseif ($type === 'exam_approved') {
                     $redirect = route('report-card.marks', ['type' => 'exam']);
-                    $actionLabel = 'View exam results';
+                    $actionLabel = 'View Exam marks results';
                 } elseif ($type === 'report_rejected' && auth()->user()->isTeacher()) {
                     $redirect = route('teacher.marks-entry');
                     $actionLabel = 'Go to marks entry';

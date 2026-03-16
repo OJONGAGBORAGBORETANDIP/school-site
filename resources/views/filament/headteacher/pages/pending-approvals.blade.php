@@ -5,7 +5,7 @@
         </form>
 
         <p class="text-sm text-gray-500 dark:text-gray-400">
-            Select a class section and term above. Pending CA and Exam submissions will appear in the table below. Use <strong>View marks</strong> to see student marks before approving or rejecting. When rejecting, you will be asked to enter a reason so the teacher can correct and resubmit.
+            Select a class section and term above. Pending Sequence and Exam submissions will appear in the table below. Use <strong>View marks</strong> to see student marks before approving or rejecting. When rejecting, you will be asked to enter a reason so the teacher can correct and resubmit.
         </p>
 
         <div>
@@ -19,7 +19,7 @@
             <div class="flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-gray-900">
                 <div class="flex items-center justify-between border-b border-gray-200 px-4 py-4 dark:border-white/10 sm:px-6">
                     <h3 class="text-base font-semibold leading-6 text-gray-950 dark:text-white">
-                        Marks — {{ $viewMarksSubjectName }} ({{ $viewMarksType === 'ca' ? 'CA' : 'Exam' }})
+                        Marks — {{ $viewMarksSubjectName }} ({{ $viewMarksType === 'ca' ? 'Sequence' : 'Exam' }})
                     </h3>
                     <x-filament::button size="sm" color="gray" wire:click="closeViewMarks">
                         Close

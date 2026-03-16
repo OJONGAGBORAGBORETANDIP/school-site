@@ -33,7 +33,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
     protected static string|UnitEnum|null $navigationGroup = 'Report Cards';
     protected static ?int $navigationSort = 5;
     protected static ?string $navigationLabel = 'Pending Approvals';
-    protected static ?string $title = 'Pending CA & Exam Approvals';
+    protected static ?string $title = 'Pending Sequence & Exam Approvals';
 
     public ?array $data = [];
 
@@ -185,7 +185,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
             ])
             ->striped()
             ->emptyStateHeading('No pending submissions')
-            ->emptyStateDescription('Select a class section and term above. Pending CA or Exam submissions will appear here.');
+            ->emptyStateDescription('Select a class section and term above. Pending Sequence or Exam submissions will appear here.');
     }
 
     private function rejectCaWithReason(int $subjectId, string $reason): void
@@ -199,7 +199,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
         }
         try {
             app(HeadteacherApprovalService::class)->rejectCa($classSectionId, $termId, $subjectId, $reason);
-            Notification::make()->title('CA rejected')->body('Teacher has been notified and can resubmit.')->warning()->send();
+            Notification::make()->title('Sequence rejected')->body('Teacher has been notified and can resubmit.')->warning()->send();
         } catch (\Throwable $e) {
             Notification::make()->title('Error')->body($e->getMessage())->danger()->send();
         }
@@ -216,7 +216,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
         }
         try {
             app(HeadteacherApprovalService::class)->rejectExam($classSectionId, $termId, $subjectId, $reason);
-            Notification::make()->title('Exam rejected')->body('Teacher has been notified and can resubmit.')->warning()->send();
+            Notification::make()->title('Exam marks rejected')->body('Teacher has been notified and can resubmit.')->warning()->send();
         } catch (\Throwable $e) {
             Notification::make()->title('Error')->body($e->getMessage())->danger()->send();
         }
@@ -338,7 +338,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
     {
         $reason = trim($this->rejectReasonCa);
         if ($reason === '') {
-            Notification::make()->title('Enter a rejection reason for CA first.')->danger()->send();
+            Notification::make()->title('Enter a rejection reason for Sequence first.')->danger()->send();
             return;
         }
         $data = $this->form->getState();
@@ -350,7 +350,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
         }
         try {
             app(HeadteacherApprovalService::class)->rejectCa($classSectionId, $termId, $subjectId, $reason);
-            Notification::make()->title('CA rejected')->body('Teacher has been notified and can resubmit.')->warning()->send();
+            Notification::make()->title('Sequence rejected')->body('Teacher has been notified and can resubmit.')->warning()->send();
             $this->rejectReasonCa = '';
         } catch (\Throwable $e) {
             Notification::make()->title('Error')->body($e->getMessage())->danger()->send();
@@ -361,7 +361,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
     {
         $reason = trim($this->rejectReasonExam);
         if ($reason === '') {
-            Notification::make()->title('Enter a rejection reason for Exam first.')->danger()->send();
+            Notification::make()->title('Enter a rejection reason for Exam marks first.')->danger()->send();
             return;
         }
         $data = $this->form->getState();
@@ -373,7 +373,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
         }
         try {
             app(HeadteacherApprovalService::class)->rejectExam($classSectionId, $termId, $subjectId, $reason);
-            Notification::make()->title('Exam rejected')->body('Teacher has been notified and can resubmit.')->warning()->send();
+            Notification::make()->title('Exam marks rejected')->body('Teacher has been notified and can resubmit.')->warning()->send();
             $this->rejectReasonExam = '';
         } catch (\Throwable $e) {
             Notification::make()->title('Error')->body($e->getMessage())->danger()->send();
@@ -392,7 +392,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
         try {
             $service = app(HeadteacherApprovalService::class);
             $count = $service->approveCa($classSectionId, $termId, $subjectId);
-            Notification::make()->title('CA approved')->body("{$count} record(s) approved.")->success()->send();
+            Notification::make()->title('Sequence approved')->body("{$count} record(s) approved.")->success()->send();
         } catch (\Throwable $e) {
             Notification::make()->title('Error')->body($e->getMessage())->danger()->send();
         }
@@ -410,7 +410,7 @@ class PendingApprovals extends Page implements HasActions, HasForms, HasTable
         try {
             $service = app(HeadteacherApprovalService::class);
             $count = $service->approveExam($classSectionId, $termId, $subjectId);
-            Notification::make()->title('Exam approved')->body("{$count} record(s) approved.")->success()->send();
+            Notification::make()->title('Exam marks approved')->body("{$count} record(s) approved.")->success()->send();
         } catch (\Throwable $e) {
             Notification::make()->title('Error')->body($e->getMessage())->danger()->send();
         }

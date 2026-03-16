@@ -14,7 +14,7 @@
                     Enter Marks
                 </x-slot>
                 <x-slot name="description">
-                    Enter CA marks and Exam marks for each student. Total marks, grade, and remark will be calculated automatically.
+                    Enter Sequence marks and Exam marks for each student. Total marks, grade, and remark will be calculated automatically.
                 </x-slot>
 
                 <div class="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8">
@@ -39,7 +39,7 @@
                                     <th class="fi-ta-header-cell px-3 py-3.5 sm:px-6 text-start">
                                         <span class="group flex w-full items-center gap-x-1.5">
                                             <span class="fi-ta-header-cell-label text-sm font-semibold text-gray-950 dark:text-white">
-                                                CA Mark
+                                                Sequence Mark
                                             </span>
                                         </span>
                                     </th>
