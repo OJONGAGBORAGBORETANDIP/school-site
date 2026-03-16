@@ -11,15 +11,22 @@ class AuthController extends Controller
 {
 
     public function register(Request $request){
-        $credentials = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users|max:255',
-            'password' => 'required|string|min:8',
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        // dd($credentials);
-        $credentials['password'] = Hash::make($credentials['password']);
-        $user = User::create($credentials);
+
+        // Hash password and create user
+        $data['password'] = Hash::make($data['password']);
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+        ]);
+
         Auth::login($user);
+
         return redirect()->route('dashboard');
     }
     public function login(Request $request){

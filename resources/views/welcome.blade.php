@@ -84,8 +84,7 @@
 
             <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.8);">
                 <i class="fas fa-rocket" style="font-size: 64px; color: #4CAF50; margin-bottom: 24px;"></i>
-                <form id="loginForm">
-                    <form id="loginForm" method="POST" action="{{ route('register-user') }}">
+                    <form id="registerForm" method="POST" action="{{ route('register-user') }}">
                         @csrf
                         <div class="form-group full-width">
                             <label>Name</label>
@@ -113,9 +112,9 @@
 
                         <div class="form-group full-width">
                             <label>Confirm Password</label>
-                            <input type="password" class="form-input" name="confirm_password"
+                            <input type="password" class="form-input" name="password_confirmation"
                                 placeholder="Confirm password" required>
-                            @error('confirm_password')
+                            @error('password_confirmation')
                                 <span class="text-red-500">{{ $message }}</span>
                             @enderror
                         </div>
@@ -125,7 +124,7 @@
                                 <i class="fas fa-arrow-right"></i>
                                 Register
                             </button>
-                            <button class="login-submit" style="width: 100%; margin-top: 24px;"
+                            <button type="button" class="login-submit" style="width: 100%; margin-top: 24px;"
                                 onclick="closeRegisterModal()">
                                 Back to Login
                             </button>
