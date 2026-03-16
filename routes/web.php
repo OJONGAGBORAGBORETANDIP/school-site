@@ -4,11 +4,13 @@ use App\Http\Middleware\EnsureUserIsTeacher;
 use App\Livewire\Teacher\MarksEntry;
 use App\Livewire\Teacher\ResultReview;
 use App\Models\SchoolYear;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+Route::post('/login-user', [AuthController::class, 'login'])->name('login-user');
 
 // Single dashboard: same layout (sidebar + nav + main) for all; content by role (teacher / parent).
 Route::get('dashboard', function () {

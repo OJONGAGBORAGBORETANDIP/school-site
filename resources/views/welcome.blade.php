@@ -78,7 +78,9 @@
             <h2 class="form-title">Welcome Back</h2>
             <p class="form-subtitle">Sign in to your account</p>
             
-            <form id="loginForm" onsubmit="handleLogin(event)">
+            {{-- <form id="loginForm" method="POST" action="{{ route('login') }}" onsubmit="handleLogin(event)"> --}}
+            <form id="loginForm" method="POST" action="{{ route('login-user') }}">
+                @csrf
                 <div class="form-group full-width">
                     <label>Email</label>
                     <input type="email" class="form-input" name="email" placeholder="Enter email" required>
