@@ -138,7 +138,7 @@
         </flux:sidebar.nav>
 
         <flux:dropdown position="top" align="start" class="max-lg:hidden">
-            <flux:sidebar.profile avatar="https://fluxui.dev/img/demo/user.png" name="{{ auth()->user()->name }}" />
+            <flux:sidebar.profile name="{{ auth()->user()->name }}" />
             <flux:menu>
                 <flux:menu.item icon="user" href="{{ route('change-password') }}">{{ __('Change Password') }}</flux:menu.item>
                 <flux:menu.separator />
