@@ -31,7 +31,8 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->brandName('Report Card System - Admin')
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => '#00FF7F',
+                // 'primary' => Color::Blue,
             ])
             ->authGuard('web')
             ->authPasswordBroker('users')
@@ -43,7 +44,10 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                FilamentInfoWidget::class,
+                // FilamentInfoWidget::class,
+                \App\Filament\Headteacher\Widgets\ReportCardStatsWidget::class,
+                \App\Filament\Headteacher\Widgets\ClassPerformanceWidget::class,
+                AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

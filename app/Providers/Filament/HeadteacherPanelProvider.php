@@ -30,7 +30,8 @@ class HeadteacherPanelProvider extends PanelProvider
             ->login()
             ->brandName('Report Card System - Headteacher')
             ->colors([
-                'primary' => Color::Green,
+                // 'primary' => Color::Green,
+                'primary' => '#00FF7F',
             ])
             ->authGuard('web')
             ->authPasswordBroker('users')
