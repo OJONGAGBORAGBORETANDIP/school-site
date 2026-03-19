@@ -7,9 +7,14 @@ use App\Models\SchoolYear;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::get('/teacher-login', function () {
     return view('welcome');
-});
+})->name('teacher.login');
+
+Route::get('/', function () {
+    return view('landing');
+})->name('landing');
+
 Route::post('/login-user', [AuthController::class, 'login'])->name('login-user');
 Route::post('/register-user', [AuthController::class, 'register'])->name('register-user');
 
