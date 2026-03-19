@@ -43,6 +43,18 @@ class AuthController extends Controller
                 ->withInput($request->except('password'));
         }
 
+        // Allow only parent and teacher accounts via this login form
+        $user = Auth::user();
+        if (!$user || (!$user->isParent() && !$user->isTeacher())) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()
+                ->withErrors(['email' => 'Only parent and teacher accounts can log in here.'])
+                ->withInput($request->except('password'));
+        }
+
         // Regenerate session to prevent fixation and redirect to dashboard
         $request->session()->regenerate();
 
