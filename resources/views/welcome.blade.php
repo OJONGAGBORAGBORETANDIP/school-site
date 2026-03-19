@@ -29,11 +29,21 @@
             <h2 class="form-title">Welcome Back</h2>
             <p class="form-subtitle">Sign in to your account</p>
 
+            @if ($errors->any() && !old('name'))
+                <div style="margin-bottom: 16px; padding: 10px 12px; border-radius: 10px; background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #fecaca; font-size: 14px;">
+                    <ul style="margin: 0; padding-left: 18px;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form id="loginForm" method="POST" action="{{ route('login-user') }}">
                 @csrf
                 <div class="form-group full-width">
                     <label>Email</label>
-                    <input type="email" class="form-input" name="email" placeholder="Enter email" required>
+                    <input type="email" class="form-input" name="email" placeholder="Enter email" value="{{ old('email') }}" required>
                 </div>
 
                 <div class="form-group full-width">
@@ -64,18 +74,27 @@
 
             <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.8);">
                 <i class="fas fa-rocket" style="font-size: 64px; color: #4CAF50; margin-bottom: 24px;"></i>
+                @if ($errors->any() && old('name'))
+                    <div style="margin-bottom: 16px; padding: 10px 12px; border-radius: 10px; background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(220, 38, 38, 0.5); color: #fecaca; font-size: 14px; text-align: left;">
+                        <ul style="margin: 0; padding-left: 18px;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <form id="registerForm" method="POST" action="{{ route('register-user') }}">
                     @csrf
                     <div class="form-group full-width">
                         <label>Name</label>
-                        <input type="text" class="form-input" name="name" placeholder="Enter name" required>
+                        <input type="text" class="form-input" name="name" placeholder="Enter name" value="{{ old('name') }}" required>
                         @error('name')
                             <span class="text-red-500">{{ $message }}</span>
                         @enderror
                     </div>
                     <div class="form-group full-width">
                         <label>Email</label>
-                        <input type="email" class="form-input" name="email" placeholder="Enter email" required>
+                        <input type="email" class="form-input" name="email" placeholder="Enter email" value="{{ old('email') }}" required>
                         @error('email')
                             <span class="text-red-500">{{ $message }}</span>
                         @enderror
@@ -113,5 +132,16 @@
         </div>
     </div>
     <script src="{{asset('js/welcome-scripts.js')}}"></script>
+    @if ($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                @if (old('name'))
+                    openRegisterModal();
+                @else
+                    openLoginModal();
+                @endif
+            });
+        </script>
+    @endif
     <script src="https://kit.fontawesome.com/2c8a7fee58.js" crossorigin="anonymous"></script>
 </x-landing-layout>
