@@ -38,6 +38,10 @@
                 <i class="fas fa-user-plus"></i>
                 Register
             </button>
+            <a class="btn-secondary" href="{{ route('landing') }}">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </a>
         </div>
     </div>
 
@@ -134,6 +138,7 @@
         </div>
     </div>
     <script src="{{asset('js/welcome-scripts.js')}}"></script>
+    <script src="https://kit.fontawesome.com/2c8a7fee58.js" crossorigin="anonymous"></script>
 </body>
 
 </html>
