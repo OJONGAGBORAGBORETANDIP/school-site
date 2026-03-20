@@ -19,6 +19,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Contracts\View\View;
 
 class HeadteacherPanelProvider extends PanelProvider
 {
@@ -29,6 +30,10 @@ class HeadteacherPanelProvider extends PanelProvider
             ->path('headteacher')
             ->login()
             ->brandName('El-Nissi Report Card System - Headteacher')
+            ->renderHook(
+                'panels::body.start',
+                fn (): View => view('components.view-background')
+            )
             ->colors([
                 // 'primary' => Color::Green,
                 'primary' => '#00FF7F',
