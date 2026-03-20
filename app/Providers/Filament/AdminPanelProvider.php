@@ -29,7 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('Report Card System - Admin')
+            ->brandName('El-Nissi Report Card System - Admin')
             ->colors([
                 'primary' => '#00FF7F',
                 // 'primary' => Color::Blue,

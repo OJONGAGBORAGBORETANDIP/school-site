@@ -28,7 +28,7 @@ class HeadteacherPanelProvider extends PanelProvider
             ->id('headteacher')
             ->path('headteacher')
             ->login()
-            ->brandName('Report Card System - Headteacher')
+            ->brandName('El-Nissi Report Card System - Headteacher')
             ->colors([
                 // 'primary' => Color::Green,
                 'primary' => '#00FF7F',
