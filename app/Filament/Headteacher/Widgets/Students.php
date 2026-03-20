@@ -16,7 +16,7 @@ class Students extends TableWidget
         return $table
             ->query(fn (): Builder => Student::query())
             ->columns([
-                TextColumn::make('first_name'),
+                TextColumn::make('first_name')->searchable(),
                 TextColumn::make('last_name'),
                 TextColumn::make('other_names'),
                 TextColumn::make('gender'),
