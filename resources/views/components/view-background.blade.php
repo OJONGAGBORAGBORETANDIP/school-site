@@ -1,5 +1,12 @@
+@php
+    $isFilamentLoginPage = request()->is('admin/login')
+        || request()->is('headteacher/login')
+        || request()->is('teacher/login');
+@endphp
+
+@if ($isFilamentLoginPage)
 <style>
-    /* Apply custom background to Filament auth/simple pages */
+    /* Apply custom background only on Filament login pages */
     body.fi-body {
         background: url('/images/background_image.png') center center / cover no-repeat fixed !important;
     }
@@ -34,3 +41,4 @@
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
     }
 </style>
+@endif
