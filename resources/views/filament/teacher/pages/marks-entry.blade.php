@@ -39,14 +39,14 @@
                                     <th class="fi-ta-header-cell px-3 py-3.5 sm:px-6 text-start">
                                         <span class="group flex w-full items-center gap-x-1.5">
                                             <span class="fi-ta-header-cell-label text-sm font-semibold text-gray-950 dark:text-white">
-                                                Sequence Mark
+                                                Sequence Mark (out of 20)
                                             </span>
                                         </span>
                                     </th>
                                     <th class="fi-ta-header-cell px-3 py-3.5 sm:px-6 text-start">
                                         <span class="group flex w-full items-center gap-x-1.5">
                                             <span class="fi-ta-header-cell-label text-sm font-semibold text-gray-950 dark:text-white">
-                                                Exam Mark
+                                                Exam Mark (out of 20)
                                             </span>
                                         </span>
                                     </th>
@@ -97,7 +97,7 @@
                                                         type="number"
                                                         step="0.01"
                                                         min="0"
-                                                        max="100"
+                                                        max="20"
                                                         wire:model.live="marks.{{ $index }}.ca_mark"
                                                         class="w-24"
                                                     />
@@ -111,7 +111,7 @@
                                                         type="number"
                                                         step="0.01"
                                                         min="0"
-                                                        max="100"
+                                                        max="20"
                                                         wire:model.live="marks.{{ $index }}.exam_mark"
                                                         class="w-24"
                                                     />

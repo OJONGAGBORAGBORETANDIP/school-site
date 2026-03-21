@@ -8,7 +8,7 @@
                     View exam results
                 @endif
             </h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Select academic year, term and child to see approved {{ $type === 'ca' ? 'Continuous Assessment' : 'exam' }} marks for that child.</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Select academic year, term and child to see approved {{ $type === 'ca' ? 'Sequence' : 'exam' }} marks for that child.</p>
         </div>
 
         <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -64,9 +64,9 @@
                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Subject</th>
                             <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 @if($type === 'ca')
-                                    Sequence mark (out of 30)
+                                    Sequence mark (out of 20)
                                 @else
-                                    Exam mark (out of 70)
+                                    Exam mark (out of 20)
                                 @endif
                             </th>
                         </tr>

@@ -23,7 +23,7 @@ class MarksEntry extends Component
 
     public $marks = [];
 
-    /** Which marks to enter: 'ca' (Continuous Assessment, out of 30) or 'exam' (out of 70). */
+    /** Which marks to enter: 'ca' (Sequence, out of 20) or 'exam' (out of 20). */
     public $markEntryType = 'ca';
 
     /** Whether the current class+term has been submitted for approval (scores read-only). */
@@ -185,18 +185,18 @@ class MarksEntry extends Component
                 $caMark = (float) ($this->marks[$index]['ca_mark'] ?? 0);
                 $examMark = (float) ($this->marks[$index]['exam_mark'] ?? 0);
 
-                // Enforce limits: CA max 30, Exam max 70
-                if ($caMark > 30) {
-                    $this->marks[$index]['ca_mark'] = 30;
-                    $caMark = 30;
+                // Enforce limits: Sequence max 20, Exam max 20
+                if ($caMark > 20) {
+                    $this->marks[$index]['ca_mark'] = 20;
+                    $caMark = 20;
                 }
                 if ($caMark < 0) {
                     $this->marks[$index]['ca_mark'] = 0;
                     $caMark = 0;
                 }
-                if ($examMark > 70) {
-                    $this->marks[$index]['exam_mark'] = 70;
-                    $examMark = 70;
+                if ($examMark > 20) {
+                    $this->marks[$index]['exam_mark'] = 20;
+                    $examMark = 20;
                 }
                 if ($examMark < 0) {
                     $this->marks[$index]['exam_mark'] = 0;
@@ -207,7 +207,8 @@ class MarksEntry extends Component
                 $caPresent = ($this->marks[$index]['ca_mark'] ?? '') !== '' && ($this->marks[$index]['ca_mark'] ?? null) !== null;
                 $examPresent = ($this->marks[$index]['exam_mark'] ?? '') !== '' && ($this->marks[$index]['exam_mark'] ?? null) !== null;
                 if ($caPresent && $examPresent) {
-                    $totalMark = $caMark + $examMark;
+                    // Primary school scale: Sequence(/20) and Exam(/20), subject final is average(/20).
+                    $totalMark = ($caMark + $examMark) / 2;
                     $this->marks[$index]['total_mark'] = round($totalMark, 2);
                     $gradeInfo = \App\Models\GradingScale::getGradeForMark($totalMark);
                     if ($gradeInfo) {
@@ -224,7 +225,7 @@ class MarksEntry extends Component
     }
 
     /**
-     * Validate current marks: CA must be 0–30, Exam must be 0–70 when present.
+     * Validate current marks: Sequence and Exam must be 0–20 when present.
      * Returns list of error messages (empty if valid).
      */
     public function getValidationErrors(): array
@@ -236,14 +237,14 @@ class MarksEntry extends Component
             $exam = $mark['exam_mark'] ?? '';
             if ($ca !== '' && $ca !== null) {
                 $num = (float) $ca;
-                if ($num < 0 || $num > 30) {
-                    $errors[] = "CA for {$name} must be between 0 and 30 (got " . round($num, 2) . ").";
+                if ($num < 0 || $num > 20) {
+                    $errors[] = "Sequence for {$name} must be between 0 and 20 (got " . round($num, 2) . ").";
                 }
             }
             if ($exam !== '' && $exam !== null) {
                 $num = (float) $exam;
-                if ($num < 0 || $num > 70) {
-                    $errors[] = "Exam for {$name} must be between 0 and 70 (got " . round($num, 2) . ").";
+                if ($num < 0 || $num > 20) {
+                    $errors[] = "Exam for {$name} must be between 0 and 20 (got " . round($num, 2) . ").";
                 }
             }
         }
@@ -304,7 +305,7 @@ class MarksEntry extends Component
     }
 
     /**
-     * Save scores as draft. Validates CA (0–30) and Exam (0–70). Wrong data is not saved.
+     * Save scores as draft. Validates Sequence (0–20) and Exam (0–20). Wrong data is not saved.
      */
     public function saveAsDraft(): void
     {
@@ -317,7 +318,7 @@ class MarksEntry extends Component
     }
 
     /**
-     * Save scores (same as draft). Validates CA (0–30) and Exam (0–70). Wrong data is not saved.
+     * Save scores (same as draft). Validates Sequence (0–20) and Exam (0–20). Wrong data is not saved.
      */
     public function save(): void
     {
@@ -330,13 +331,13 @@ class MarksEntry extends Component
     }
 
     /**
-     * Submit CA marks only for head teacher approval. Validates CA 0–30.
+     * Submit Sequence marks only for head teacher approval. Validates Sequence 0–20.
      */
     public function submitCaForApproval(): void
     {
         $errors = $this->getValidationErrorsForCa();
         if (!empty($errors)) {
-            session()->flash('error', 'Cannot submit CA. ' . implode(' ', $errors));
+            session()->flash('error', 'Cannot submit Sequence. ' . implode(' ', $errors));
             return;
         }
         $this->saveMarks(submit: false); // ensure data is saved
@@ -354,12 +355,12 @@ class MarksEntry extends Component
                 'ca_rejected_at' => null,
                 'ca_rejection_reason' => null,
             ]);
-        session()->flash('success', 'CA marks submitted for head teacher approval. You can still enter or edit Exam marks.');
+        session()->flash('success', 'Sequence marks submitted for head teacher approval. You can still enter or edit Exam marks.');
         $this->loadStudents();
     }
 
     /**
-     * Submit Exam marks only for head teacher approval. Validates Exam 0–70.
+     * Submit Exam marks only for head teacher approval. Validates Exam 0–20.
      */
     public function submitExamForApproval(): void
     {
@@ -383,11 +384,11 @@ class MarksEntry extends Component
                 'exam_rejected_at' => null,
                 'exam_rejection_reason' => null,
             ]);
-        session()->flash('success', 'Exam marks submitted for head teacher approval. You can still enter or edit CA marks.');
+        session()->flash('success', 'Exam marks submitted for head teacher approval. You can still enter or edit Sequence marks.');
         $this->loadStudents();
     }
 
-    /** Validation errors for CA only (0–30). */
+    /** Validation errors for Sequence only (0–20). */
     public function getValidationErrorsForCa(): array
     {
         $errors = [];
@@ -397,15 +398,15 @@ class MarksEntry extends Component
                 continue;
             }
             $num = (float) $ca;
-            if ($num < 0 || $num > 30) {
+            if ($num < 0 || $num > 20) {
                 $name = $mark['student_name'] ?? 'Row ' . ($index + 1);
-                $errors[] = "CA for {$name} must be 0–30.";
+                $errors[] = "Sequence for {$name} must be 0–20.";
             }
         }
         return $errors;
     }
 
-    /** Validation errors for Exam only (0–70). */
+    /** Validation errors for Exam only (0–20). */
     public function getValidationErrorsForExam(): array
     {
         $errors = [];
@@ -415,9 +416,9 @@ class MarksEntry extends Component
                 continue;
             }
             $num = (float) $exam;
-            if ($num < 0 || $num > 70) {
+            if ($num < 0 || $num > 20) {
                 $name = $mark['student_name'] ?? 'Row ' . ($index + 1);
-                $errors[] = "Exam for {$name} must be 0–70.";
+                $errors[] = "Exam for {$name} must be 0–20.";
             }
         }
         return $errors;
@@ -425,7 +426,7 @@ class MarksEntry extends Component
 
     /**
      * Save CA and exam scores. When $submit is true, marks only this subject's scores as submitted (not the whole term).
-     * Validates CA ≤ 30 and Exam ≤ 70 before saving.
+     * Validates Sequence ≤ 20 and Exam ≤ 20 before saving.
      */
     protected function saveMarks(bool $submit = false): void
     {
@@ -504,7 +505,7 @@ class MarksEntry extends Component
         if ($submit) {
             session()->flash('success', 'Scores saved and submitted for head teacher approval. Parents will be able to view report cards after the headmaster approves.');
         } else {
-            session()->flash('success', 'Draft saved successfully. Marks are validated (CA 0–30, Exam 0–70). You can edit and submit for approval when ready.');
+            session()->flash('success', 'Draft saved successfully. Marks are validated (Sequence 0–20, Exam 0–20). You can edit and submit for approval when ready.');
         }
         $this->loadStudents();
     }
@@ -526,7 +527,7 @@ class MarksEntry extends Component
 
     public function render()
     {
-        $gradingScales = GradingScale::orderBy('min_mark', 'desc')->get();
+        $gradingScales = collect(GradingScale::primaryScaleOutOf20());
         $activeTermId = static::getActiveTermId();
         $isActiveTerm = $activeTermId && (string) $this->selectedTerm === (string) $activeTermId;
         $hasAnyEditable = collect($this->marks)->contains(fn ($m) => ($m['can_edit_ca'] ?? false) || ($m['can_edit_exam'] ?? false));

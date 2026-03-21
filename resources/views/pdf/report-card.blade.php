@@ -23,6 +23,7 @@
     </style>
 </head>
 <body>
+    <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" class="logo">
     <h1>{{ config('app.name') }}</h1>
     <h2>Term Report Card</h2>
 
@@ -40,8 +41,8 @@
         <thead>
             <tr>
                 <th>Subject</th>
-                <th>CA</th>
-                <th>Exam</th>
+                <th>Sequence/30</th>
+                <th>Exam/70</th>
                 <th>Total</th>
                 <th>Grade</th>
                 <th>Remark</th>

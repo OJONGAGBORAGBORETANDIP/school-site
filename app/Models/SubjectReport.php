@@ -108,13 +108,16 @@ class SubjectReport extends Model
     }
 
     /**
-     * Calculate total mark from CA and Exam marks.
-     * Only set total and grade when BOTH CA and Exam are present; otherwise leave grade blank.
+     * Primary school scoring:
+     * - Sequence is out of 20
+     * - Exam is out of 20
+     * - Final subject score (total_mark) is the average of both, out of 20.
+     * Grade scale remains 0-100, so we map out-of-20 to percentage by multiplying by 5.
      */
     public function calculateTotal(): void
     {
         if ($this->ca_mark !== null && $this->exam_mark !== null) {
-            $this->total_mark = (float) $this->ca_mark + (float) $this->exam_mark;
+            $this->total_mark = ((float) $this->ca_mark + (float) $this->exam_mark) / 2;
             $gradeInfo = \App\Models\GradingScale::getGradeForMark((float) $this->total_mark);
             if ($gradeInfo) {
                 $this->grade = $gradeInfo['grade'];

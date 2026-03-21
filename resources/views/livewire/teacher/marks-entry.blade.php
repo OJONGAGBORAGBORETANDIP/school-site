@@ -45,8 +45,8 @@
                     wire:model.live="markEntryType"
                     class="mt-1 p-2 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                 >
-                    <option value="ca">Sequence marks (out of 30)</option>
-                    <option value="exam">Exam marks (out of 70)</option>
+                    <option value="ca">Sequence marks (out of 20)</option>
+                    <option value="exam">Exam marks (out of 20)</option>
                 </select>
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Choose which marks you are entering.</p>
             </div>
@@ -107,9 +107,9 @@
                     </h3>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         @if($markEntryType === 'ca')
-                            Entering <strong>Sequence marks (out of 30)</strong>. Exam column is read-only. Final score = CA + Exam.
+                            Entering <strong>Sequence marks (out of 20)</strong>. Exam column is read-only. Final score = (Sequence + Exam) / 2.
                         @else
-                            Entering <strong>Exam marks (out of 70)</strong>. Sequence column is read-only. Final score = Sequence + Exam.
+                            Entering <strong>Exam marks (out of 20)</strong>. Sequence column is read-only. Final score = (Sequence + Exam) / 2.
                         @endif
                     </p>
                 </div>
@@ -126,8 +126,8 @@
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Student</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Admission No.</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sequence (out of 30)</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Exam (out of 70)</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sequence (out of 20)</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Exam (out of 20)</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Grade</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Comment</th>
@@ -150,10 +150,10 @@
                                             type="number"
                                             step="0.01"
                                             min="0"
-                                            max="30"
+                                            max="20"
                                             wire:model.live="marks.{{ $index }}.ca_mark"
                                             class="w-20 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                            placeholder="0–30"
+                                            placeholder="0–20"
                                         />
                                     @endif
                                 </td>
@@ -169,10 +169,10 @@
                                             type="number"
                                             step="0.01"
                                             min="0"
-                                            max="70"
+                                            max="20"
                                             wire:model.live="marks.{{ $index }}.exam_mark"
                                             class="w-20 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                            placeholder="0–70"
+                                            placeholder="0–20"
                                         />
                                     @endif
                                 </td>
@@ -200,7 +200,7 @@
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
                     @if(!empty($validationErrors))
                         <div class="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
-                            <strong>Validation failed:</strong> Sequence must be 0–30, Exam must be 0–70. Fix the following before saving or submitting:
+                            <strong>Validation failed:</strong> Sequence must be 0–20, Exam must be 0–20. Fix the following before saving or submitting:
                             <ul class="mt-1 list-disc list-inside">
                                 @foreach($validationErrors as $err)
                                     <li>{{ $err }}</li>
@@ -209,7 +209,7 @@
                         </div>
                     @else
                         <div class="text-sm text-gray-600 dark:text-gray-400">
-                            <strong>Validation:</strong> Sequence 0–30, Exam 0–70. Both buttons check these limits before saving.
+                            <strong>Validation:</strong> Sequence 0–20, Exam 0–20. Both buttons check these limits before saving.
                         </div>
                     @endif
                     <div class="flex flex-wrap justify-end gap-3">
@@ -233,7 +233,7 @@
                             wire:confirm="Submit Sequence marks for head teacher approval? You will not be able to edit Sequence until headteacher approves or rejects."
                             class="inline-flex items-center px-4 py-2 border border-amber-300 dark:border-amber-600 text-sm font-medium rounded-md shadow-sm text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
                         >
-                            Submit CA for approval
+                            Submit Sequence for approval
                         </button>
                         <button
                             type="button"
@@ -250,12 +250,12 @@
             <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30 rounded-b-lg">
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">How scores are calculated</h4>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                    <strong>Final score</strong> = CA + Exam (no conversion: CA is out of 30, Exam is out of 70; total is out of 100).
+                    <strong>Final score (out of 20)</strong> = (Sequence + Exam) / 2.
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-500 mb-3">
-                    Enter CA (0–30) and Exam (0–70). The system adds them to get the total (0–100) and assigns a grade from the scale below.
+                    Enter Sequence (0–20) and Exam (0–20). The system averages them to get the final score (0–20) and assigns a grade from the scale below.
                 </p>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Grading scale (A–F, based on total out of 100)</h4>
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Grading scale (A–F)</h4>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm border border-gray-200 dark:border-gray-600 rounded-md">
                         <thead class="bg-gray-100 dark:bg-gray-700">
@@ -268,9 +268,9 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
                             @foreach($gradingScales as $scale)
                                 <tr>
-                                    <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ $scale->min_mark }} – {{ $scale->max_mark }}</td>
-                                    <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $scale->grade }}</td>
-                                    <td class="px-3 py-2 text-gray-600 dark:text-gray-400">{{ $scale->remark }}</td>
+                                    <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ $scale['min_mark'] }} – {{ $scale['max_mark'] }}</td>
+                                    <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $scale['grade'] }}</td>
+                                    <td class="px-3 py-2 text-gray-600 dark:text-gray-400">{{ $scale['remark'] }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

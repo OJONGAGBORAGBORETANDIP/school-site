@@ -132,8 +132,8 @@ class ResultReview extends Component
         foreach ($reports as $report) {
             $ca = $report->ca_mark !== null ? (float) $report->ca_mark : null;
             $exam = $report->exam_mark !== null ? (float) $report->exam_mark : null;
-            if (($ca !== null && ($ca < 0 || $ca > 30)) || ($exam !== null && ($exam < 0 || $exam > 70))) {
-                session()->flash('error', 'Some marks for this subject are out of range (CA 0–30, Exam 0–70). Fix them in Marks entry first.');
+            if (($ca !== null && ($ca < 0 || $ca > 20)) || ($exam !== null && ($exam < 0 || $exam > 20))) {
+                session()->flash('error', 'Some marks for this subject are out of range (Sequence 0–20, Exam 0–20). Fix them in Marks entry first.');
                 return;
             }
         }

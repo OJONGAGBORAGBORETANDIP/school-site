@@ -180,8 +180,8 @@ class MarksEntry extends Page implements HasForms
                 $examMark = (float) ($this->marks[$index]['exam_mark'] ?? 0);
                 
                 if ($caMark > 0 || $examMark > 0) {
-                    // Final score = CA (out of 30) + Exam (out of 70) = total out of 100
-                    $totalMark = $caMark + $examMark;
+                    // Primary school scale: Sequence(/20) + Exam(/20), subject final is average(/20).
+                    $totalMark = ($caMark + $examMark) / 2;
                     $this->marks[$index]['total_mark'] = round($totalMark, 2);
 
                     $gradeInfo = \App\Models\GradingScale::getGradeForMark($totalMark);
@@ -209,7 +209,7 @@ class MarksEntry extends Page implements HasForms
             return;
         }
 
-        // Validate: CA must be 0–30, Exam must be 0–70
+        // Validate: Sequence and Exam must be 0–20
         $errors = [];
         foreach ($this->marks as $index => $mark) {
             $name = $mark['student_name'] ?? 'Row ' . ($index + 1);
@@ -217,14 +217,14 @@ class MarksEntry extends Page implements HasForms
             $exam = $mark['exam_mark'] ?? null;
             if ($ca !== null && $ca !== '') {
                 $num = (float) $ca;
-                if ($num < 0 || $num > 30) {
-                    $errors[] = "CA for {$name} must be between 0 and 30.";
+                if ($num < 0 || $num > 20) {
+                    $errors[] = "Sequence for {$name} must be between 0 and 20.";
                 }
             }
             if ($exam !== null && $exam !== '') {
                 $num = (float) $exam;
-                if ($num < 0 || $num > 70) {
-                    $errors[] = "Exam for {$name} must be between 0 and 70.";
+                if ($num < 0 || $num > 20) {
+                    $errors[] = "Exam for {$name} must be between 0 and 20.";
                 }
             }
         }

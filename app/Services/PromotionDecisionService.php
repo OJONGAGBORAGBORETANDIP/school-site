@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Computes and stores promotion decisions per enrollment for a school year.
- * Default logic: average >= 50 → Promoted, average < 50 → Repeat.
+ * Default logic (primary /20 scale): average >= 10 → Promoted, average < 10 → Repeat.
  */
 class PromotionDecisionService
 {
     /** Promotion threshold: average >= this value means promoted. */
-    public const PROMOTION_THRESHOLD = 50;
+    public const PROMOTION_THRESHOLD = 10;
 
     /**
      * Generate promotion decisions for a school year based on final term results.

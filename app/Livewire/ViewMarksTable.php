@@ -54,7 +54,7 @@ class ViewMarksTable extends Component implements HasActions, HasSchemas, HasTab
                 TextColumn::make('student_name')
                     ->label('Student'),
                 TextColumn::make($markType === 'ca' ? 'ca_mark' : 'exam_mark')
-                    ->label($markType === 'ca' ? 'CA mark (out of 30)' : 'Exam mark (out of 70)')
+                    ->label($markType === 'ca' ? 'Sequence mark (out of 20)' : 'Exam mark (out of 20)')
                     ->formatStateUsing(fn ($state) => $state !== null && $state !== '' ? $state : '—')
                     ->alignEnd(),
             ])

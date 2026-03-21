@@ -16,8 +16,8 @@
         <flux:sidebar.header>
             <flux:sidebar.brand
                 href="{{ route('dashboard') }}"
-                logo="https://fluxui.dev/img/demo/logo.png"
-                logo:dark="https://fluxui.dev/img/demo/dark-mode-logo.png"
+                logo="{{ asset('images/logo.png') }}"
+                logo:dark="{{ asset('images/logo.png') }}"
                 name="{{ config('app.name') }}"
             />
             <flux:sidebar.collapse class="lg:hidden" />
