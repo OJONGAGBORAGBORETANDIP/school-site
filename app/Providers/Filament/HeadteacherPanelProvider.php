@@ -53,7 +53,6 @@ class HeadteacherPanelProvider extends PanelProvider
             ->widgets([
                 \App\Filament\Headteacher\Widgets\ReportCardStatsWidget::class,
                 \App\Filament\Headteacher\Widgets\ClassPerformanceWidget::class,
-                AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

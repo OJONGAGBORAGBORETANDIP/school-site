@@ -8,6 +8,7 @@ use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Student;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 
 class Students extends TableWidget
 {
@@ -16,15 +17,19 @@ class Students extends TableWidget
         return $table
             ->query(fn (): Builder => Student::query())
             ->columns([
-                TextColumn::make('first_name')->searchable(),
-                TextColumn::make('last_name'),
-                TextColumn::make('other_names'),
-                TextColumn::make('gender'),
-                TextColumn::make('date_of_birth'),
-                TextColumn::make('enrollments.classSection.label'),
-            ])
+                TextColumn::make('first_name')->searchable()->sortable(),
+                TextColumn::make('last_name')->searchable()->sortable(),
+                TextColumn::make('other_names')->searchable()->sortable(),
+                TextColumn::make('gender')->badge(),
+                TextColumn::make('date_of_birth')->date(),
+                TextColumn::make('enrollments.classSection.label')->badge()->separator(','),
+            ])->defaultSort('first_name')
             ->filters([
-                //
+                SelectFilter::make('gender')
+                    ->options([
+                        'male' => 'Male',
+                        'female' => 'Female',
+                    ]),
             ])
             ->headerActions([
                 //
