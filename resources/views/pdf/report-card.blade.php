@@ -5,8 +5,10 @@
     <title>Report Card – {{ $student->first_name }} {{ $student->last_name }}</title>
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; margin: 20px; color: #111; }
-        h1 { font-size: 18px; text-align: center; margin-bottom: 4px; }
-        h2 { font-size: 14px; text-align: center; color: #333; margin-bottom: 20px; }
+        /* One block so logo + titles share the same centering (DomPDF flex is unreliable) */
+        .report-header { text-align: center; width: 100%; margin-bottom: 4px; }
+        .report-header h1 { font-size: 18px; text-align: center; margin: 0 0 4px 0; }
+        .report-header h2 { font-size: 14px; text-align: center; color: #333; margin: 0 0 20px 0; }
         .info { margin-bottom: 16px; }
         .info table { width: 100%; }
         .info td { padding: 2px 8px 2px 0; }
@@ -20,12 +22,17 @@
         .section { margin-top: 16px; }
         .section h3 { font-size: 12px; margin-bottom: 6px; border-bottom: 1px solid #ccc; }
         .footer { margin-top: 24px; font-size: 10px; color: #666; text-align: center; }
+        .report-header .logo { display: inline-block; max-height: 56px; width: auto; margin: 0 0 10px 0; vertical-align: middle; }
     </style>
 </head>
 <body>
-    <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" class="logo">
-    <h1>{{ config('app.name') }}</h1>
-    <h2>Term Report Card</h2>
+    <div class="report-header">
+        @if(!empty($logoDataUri))
+        <img src="{{ $logoDataUri }}" alt="{{ config('app.name') }}" class="logo">
+        @endif
+        <h1>{{ config('app.name') }}</h1>
+        <h2>Term Report Card</h2>
+    </div>
 
     <div class="info">
         <table>
@@ -41,8 +48,8 @@
         <thead>
             <tr>
                 <th>Subject</th>
-                <th>Sequence/30</th>
-                <th>Exam/70</th>
+                <th>Sequence/20</th>
+                <th>Exam/20</th>
                 <th>Total</th>
                 <th>Grade</th>
                 <th>Remark</th>

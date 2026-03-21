@@ -100,11 +100,25 @@ class ReportCardController extends Controller
             'subjectReports' => $subjectReports,
             'behaviourRatings' => $termReport->behaviourRatings,
             'attendanceSummary' => $attendanceSummary,
+            'logoDataUri' => $this->reportCardLogoDataUri(),
         ]);
 
         $filename = sprintf('report-card-%s-term-%s.pdf', $student->admission_number, $term->number);
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Inline logo for DomPDF: remote/http asset URLs often fail; base64 data URIs work reliably.
+     */
+    private function reportCardLogoDataUri(): string
+    {
+        $path = public_path('images/logo.png');
+        if (! is_file($path)) {
+            return '';
+        }
+
+        return 'data:image/png;base64,'.base64_encode((string) file_get_contents($path));
     }
 
     /**
