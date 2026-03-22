@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,16 +11,15 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @fluxAppearance
     @livewireStyles
+    <link rel="stylesheet" href="{{ asset('css/dashboard-style.css') }}">
 </head>
+
 <body class="min-h-screen bg-white dark:bg-zinc-800 antialiased">
-    <flux:sidebar sticky collapsible="mobile" class="bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-700">
+    <flux:sidebar sticky collapsible="mobile"
+        class="bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-700">
         <flux:sidebar.header>
-            <flux:sidebar.brand
-                href="{{ route('dashboard') }}"
-                logo="{{ asset('images/logo.png') }}"
-                logo:dark="{{ asset('images/logo.png') }}"
-                name="{{ config('app.name') }}"
-            />
+            <flux:sidebar.brand href="{{ route('dashboard') }}" logo="{{ asset('images/logo.png') }}"
+                logo:dark="{{ asset('images/logo.png') }}" name="{{ config('app.name') }}" />
             <flux:sidebar.collapse class="lg:hidden" />
         </flux:sidebar.header>
 
@@ -33,20 +33,25 @@
                 $isSettings = request()->routeIs('settings');
             @endphp
             @if($isDashboard)
-            <flux:sidebar.item icon="home" href="{{ route('dashboard') }}" current>{{ __('Dashboard') }}</flux:sidebar.item>
+                <flux:sidebar.item icon="home" href="{{ route('dashboard') }}" current>{{ __('Dashboard') }}
+                </flux:sidebar.item>
             @else
-            <flux:sidebar.item icon="home" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</flux:sidebar.item>
+                <flux:sidebar.item icon="home" href="{{ route('dashboard') }}">{{ __('Dashboard') }}</flux:sidebar.item>
             @endif
             @if(auth()->user()->isTeacher())
                 @if($isMarksEntry)
-                <flux:sidebar.item icon="inbox" href="{{ route('teacher.marks-entry') }}" current>{{ __('Marks entry') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="inbox" href="{{ route('teacher.marks-entry') }}" current>{{ __('Marks entry') }}
+                    </flux:sidebar.item>
                 @else
-                <flux:sidebar.item icon="inbox" href="{{ route('teacher.marks-entry') }}">{{ __('Marks entry') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="inbox" href="{{ route('teacher.marks-entry') }}">{{ __('Marks entry') }}
+                    </flux:sidebar.item>
                 @endif
                 @if($isResultReview)
-                <flux:sidebar.item icon="document-text" href="{{ route('teacher.result-review') }}" current>{{ __('Result review') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="document-text" href="{{ route('teacher.result-review') }}" current>
+                        {{ __('Result review') }}</flux:sidebar.item>
                 @else
-                <flux:sidebar.item icon="document-text" href="{{ route('teacher.result-review') }}">{{ __('Result review') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="document-text" href="{{ route('teacher.result-review') }}">
+                        {{ __('Result review') }}</flux:sidebar.item>
                 @endif
             @endif
             @if(auth()->user()->isParent())
@@ -56,19 +61,25 @@
                     $isExamMarks = request()->routeIs('report-card.marks') && request()->route('type') === 'exam';
                 @endphp
                 @if($isReportCards)
-                <flux:sidebar.item icon="academic-cap" href="{{ route('dashboard') }}#report-cards" current>{{ __('Report cards') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="academic-cap" href="{{ route('dashboard') }}#report-cards" current>
+                        {{ __('Report cards') }}</flux:sidebar.item>
                 @else
-                <flux:sidebar.item icon="academic-cap" href="{{ route('dashboard') }}#report-cards">{{ __('Report cards') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="academic-cap" href="{{ route('dashboard') }}#report-cards">{{ __('Report cards') }}
+                    </flux:sidebar.item>
                 @endif
                 @if($isCaMarks)
-                <flux:sidebar.item icon="clipboard-document-list" href="{{ route('report-card.marks', ['type' => 'ca']) }}" current>{{ __('View CA results') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-list" href="{{ route('report-card.marks', ['type' => 'ca']) }}"
+                        current>{{ __('View Sequence results') }}</flux:sidebar.item>
                 @else
-                <flux:sidebar.item icon="clipboard-document-list" href="{{ route('report-card.marks', ['type' => 'ca']) }}">{{ __('View CA results') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-list" href="{{ route('report-card.marks', ['type' => 'ca']) }}">
+                        {{ __('View CA results') }}</flux:sidebar.item>
                 @endif
                 @if($isExamMarks)
-                <flux:sidebar.item icon="document-text" href="{{ route('report-card.marks', ['type' => 'exam']) }}" current>{{ __('View exam results') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="document-text" href="{{ route('report-card.marks', ['type' => 'exam']) }}" current>
+                        {{ __('View exam results') }}</flux:sidebar.item>
                 @else
-                <flux:sidebar.item icon="document-text" href="{{ route('report-card.marks', ['type' => 'exam']) }}">{{ __('View exam results') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="document-text" href="{{ route('report-card.marks', ['type' => 'exam']) }}">
+                        {{ __('View exam results') }}</flux:sidebar.item>
                 @endif
             @endif
         </flux:sidebar.nav>
@@ -84,7 +95,8 @@
                 <flux:sidebar.item icon="bell" class="relative">
                     {{ __('Notifications') }}
                     @if($unreadCount > 0)
-                        <span class="absolute right-2 top-1/2 -translate-y-1/2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs text-white">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                        <span
+                            class="absolute right-2 top-1/2 -translate-y-1/2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs text-white">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
                     @endif
                 </flux:sidebar.item>
                 <flux:menu class="max-h-80 overflow-y-auto w-72">
@@ -107,7 +119,8 @@
                         <flux:menu.item href="{{ $url }}" icon="{{ $icon }}">
                             <span class="text-sm">{{ $data['message'] ?? 'Notification' }}</span>
                         </flux:menu.item>
-                        @if(!$loop->last)<flux:menu.separator />@endif
+                        @if(!$loop->last)
+                        <flux:menu.separator />@endif
                     @empty
                         <flux:menu.item icon="check-circle" href="{{ route('notifications.index') }}">
                             <span class="text-sm text-gray-500">{{ __('No new notifications') }}</span>
@@ -115,12 +128,12 @@
                     @endforelse
                     <flux:menu.separator />
                     @if($unreadCount > 0)
-                    <flux:menu.item icon="check">
-                        <form method="POST" action="{{ route('notifications.mark-all-read') }}" class="w-full">
-                            @csrf
-                            <button type="submit" class="w-full text-left text-sm">{{ __('Mark all as read') }}</button>
-                        </form>
-                    </flux:menu.item>
+                        <flux:menu.item icon="check">
+                            <form method="POST" action="{{ route('notifications.mark-all-read') }}" class="w-full">
+                                @csrf
+                                <button type="submit" class="w-full text-left text-sm">{{ __('Mark all as read') }}</button>
+                            </form>
+                        </flux:menu.item>
                     @endif
                     <flux:menu.item icon="list-bullet" href="{{ route('notifications.index') }}">
                         <span class="text-sm">{{ __('View all notifications') }}</span>
@@ -131,16 +144,19 @@
 
         <flux:sidebar.nav>
             @if($isSettings)
-            <flux:sidebar.item icon="cog-6-tooth" href="{{ route('settings') }}" current>{{ __('Settings') }}</flux:sidebar.item>
+                <flux:sidebar.item icon="cog-6-tooth" href="{{ route('settings') }}" current>{{ __('Settings') }}
+                </flux:sidebar.item>
             @else
-            <flux:sidebar.item icon="cog-6-tooth" href="{{ route('settings') }}">{{ __('Settings') }}</flux:sidebar.item>
+                <flux:sidebar.item icon="cog-6-tooth" href="{{ route('settings') }}">{{ __('Settings') }}
+                </flux:sidebar.item>
             @endif
         </flux:sidebar.nav>
 
         <flux:dropdown position="top" align="start" class="max-lg:hidden">
             <flux:sidebar.profile name="{{ auth()->user()->name }}" />
             <flux:menu>
-                <flux:menu.item icon="user" href="{{ route('change-password') }}">{{ __('Change Password') }}</flux:menu.item>
+                <flux:menu.item icon="user" href="{{ route('change-password') }}">{{ __('Change Password') }}
+                </flux:menu.item>
                 <flux:menu.separator />
                 <flux:menu.item icon="arrow-right-start-on-rectangle">
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
@@ -158,7 +174,8 @@
         <flux:dropdown position="top" align="start">
             <flux:profile avatar="https://fluxui.dev/img/demo/user.png" />
             <flux:menu>
-                <flux:menu.item icon="user" href="{{ route('change-password') }}">{{ __('Change Password') }}</flux:menu.item>
+                <flux:menu.item icon="user" href="{{ route('change-password') }}">{{ __('Change Password') }}
+                </flux:menu.item>
                 <flux:menu.separator />
                 <flux:menu.item icon="arrow-right-start-on-rectangle">
                     <form method="POST" action="{{ route('logout') }}">
@@ -168,7 +185,7 @@
                         </button>
                     </form>
                 </flux:menu.item>
-                
+
             </flux:menu>
         </flux:dropdown>
     </flux:header>
@@ -183,10 +200,12 @@
         </header>
 
         @if (session('success'))
-            <div class="mb-4 rounded-lg bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">{{ session('success') }}</div>
+            <div class="mb-4 rounded-lg bg-green-50 dark:bg-green-900/20 p-4 text-sm text-green-700 dark:text-green-400">
+                {{ session('success') }}</div>
         @endif
         @if (session('error'))
-            <div class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">{{ session('error') }}</div>
+            <div class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
+                {{ session('error') }}</div>
         @endif
 
         @hasSection('content')
@@ -199,4 +218,5 @@
     @livewireScripts
     @fluxScripts
 </body>
+
 </html>

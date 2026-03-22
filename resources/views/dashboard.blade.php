@@ -69,7 +69,7 @@
         @endif
 
         @if(auth()->user()->isParent())
-            <section id="report-cards" class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 dark:border-gray-700 scroll-mt-4">
+            <section id="report-cards" class="login-form-container">
                 <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Report cards</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">View your children’s interim marks (as the headteacher approves each subject) and full results with class position when released.</p>
@@ -95,7 +95,7 @@
                                                 ->take(5);
                                         @endphp
                                         @forelse($visibleReportTerms as $tr)
-                                            <a href="{{ route('report-card.show', [$student, $tr->term]) }}" class="inline-flex items-center px-3 py-1.5 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50">{{ $tr->term->name }} {{ $tr->term->schoolYear->name ?? '' }} →</a>
+                                            <a href="{{ route('report-card.show', [$student, $tr->term]) }}" class="btn-primary">{{ $tr->term->name }} {{ $tr->term->schoolYear->name ?? '' }} →</a>
                                         @empty
                                             <span class="text-sm text-gray-500 dark:text-gray-400">No results for this child yet. Marks will appear here once the headteacher approves them.</span>
                                         @endforelse

@@ -8,7 +8,7 @@
 <div class="space-y-6">
     @if($showFullReport)
     <div class="flex justify-end">
-        <a href="{{ route('report-card.download', [$student, $term]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
+        <a href="{{ route('report-card.download', [$student, $term]) }}" class="btn-primary">
             Download Report Card (PDF)
         </a>
     </div>
@@ -18,7 +18,7 @@
     </div>
     @endif
 
-    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="login-form-container">
         {{-- Student info --}}
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Student Information</h3>

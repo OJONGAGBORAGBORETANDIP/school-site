@@ -139,7 +139,7 @@ class ApprovedMarksView extends Component
 
     public function render()
     {
-        $title = $this->type === 'ca' ? 'View CA results' : 'View exam results';
+        $title = $this->type === 'ca' ? 'View Sequence results' : 'View exam results';
         return view('livewire.parent.approved-marks-view', [
             'schoolYears' => $this->schoolYears,
             'terms' => $this->terms,
