@@ -5,6 +5,7 @@ namespace App\Filament\Resources\SchoolYearResource\Pages;
 use App\Filament\Resources\SchoolYearResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
+use Illuminate\Database\Eloquent\Model;
 
 class ManageSchoolYears extends ManageRecords
 {

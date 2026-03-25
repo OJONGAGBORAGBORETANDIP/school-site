@@ -42,13 +42,13 @@ class SubjectResource extends Resource
                 ->numeric()
                 ->default(1)
                 ->minValue(1)
-                ->maxValue(6),
+                ->maxValue(9),
             Forms\Components\TextInput::make('max_level')
                 ->required()
                 ->numeric()
-                ->default(6)
+                ->default(9)
                 ->minValue(1)
-                ->maxValue(6),
+                ->maxValue(9),
             Forms\Components\Toggle::make('is_compulsory')
                 ->default(true),
         ];
