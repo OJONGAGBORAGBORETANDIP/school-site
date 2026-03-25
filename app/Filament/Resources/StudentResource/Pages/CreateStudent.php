@@ -15,20 +15,20 @@ class CreateStudent extends CreateRecord
     }
 
     protected function getRedirectUrl(): string
-{
-    return $this->getResource()::getUrl('index');
-}
+    {
+        return $this->getResource()::getUrl('index');
+    }
 
     protected function syncGuardians($student, array $data): void
     {
         $sync = [];
-        if (! empty($data['father_id'])) {
+        if (!empty($data['father_id'])) {
             $sync[(int) $data['father_id']] = ['relationship' => 'father'];
         }
-        if (! empty($data['mother_id'])) {
+        if (!empty($data['mother_id'])) {
             $sync[(int) $data['mother_id']] = ['relationship' => 'mother'];
         }
-        if (! empty($data['guardian_id'])) {
+        if (!empty($data['guardian_id'])) {
             $sync[(int) $data['guardian_id']] = ['relationship' => 'guardian'];
         }
         $student->parents()->sync($sync);

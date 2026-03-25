@@ -43,7 +43,7 @@ class SchoolClassResource extends Resource
                 ->required()
                 ->numeric()
                 ->minValue(1)
-                ->maxValue(6),
+                ->maxValue(9),
         ];
     }
 
