@@ -14,6 +14,11 @@ class CreateStudent extends CreateRecord
         $this->syncGuardians($this->record, $this->form->getState());
     }
 
+    protected function getRedirectUrl(): string
+{
+    return $this->getResource()::getUrl('index');
+}
+
     protected function syncGuardians($student, array $data): void
     {
         $sync = [];
