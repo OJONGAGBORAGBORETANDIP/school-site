@@ -4,12 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\EnrollmentResource\Pages;
 use App\Models\Enrollment;
+use Filament\Actions\BulkAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Actions\BulkAction;
 
 class EnrollmentResource extends Resource
 {
@@ -27,16 +27,12 @@ class EnrollmentResource extends Resource
         return 'Student Management';
     }
 
-    public static function getFormComponents(): array
+    /**
+     * Shared fields for class section, year, level, and active flag (single and bulk create).
+     */
+    public static function getEnrollmentDetailFormComponents(): array
     {
         return [
-            Forms\Components\Select::make('student_id')
-                ->label('Student')
-                ->relationship('student', 'admission_number')
-                ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->first_name} {$record->last_name} ({$record->admission_number})")
-                ->required()
-                ->searchable(['first_name', 'last_name', 'admission_number'])
-                ->preload(),
             Forms\Components\Select::make('class_section_id')
                 ->label('Class Section')
                 ->relationship('classSection', 'label')
@@ -53,11 +49,45 @@ class EnrollmentResource extends Resource
                 ->label('Class Level')
                 ->numeric()
                 ->minValue(1)
-                ->maxValue(6)
-                ->helperText('Primary level (1-6)'),
+                ->maxValue(9)
+                ->helperText('Primary level (1-9)'),
             Forms\Components\Toggle::make('is_active')
                 ->label('Active Enrollment')
                 ->default(true),
+        ];
+    }
+
+    /**
+     * Create modal: multiple students (handled by ManageEnrollments CreateAction::using()).
+     */
+    public static function getCreateFormComponents(): array
+    {
+        return [
+            Forms\Components\Select::make('student_ids')
+                ->label('Students')
+                ->multiple()
+                ->relationship('student', 'admission_number')
+                ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->first_name} {$record->last_name} ({$record->admission_number})")
+                ->required()
+                ->searchable(['first_name', 'last_name', 'admission_number'])
+                ->preload()
+                ->dehydrated(true)
+                ->saveRelationshipsUsing(null),
+            ...static::getEnrollmentDetailFormComponents(),
+        ];
+    }
+
+    public static function getFormComponents(): array
+    {
+        return [
+            Forms\Components\Select::make('student_id')
+                ->label('Student')
+                ->relationship('student', 'admission_number')
+                ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->first_name} {$record->last_name} ({$record->admission_number})")
+                ->required()
+                ->searchable(['first_name', 'last_name', 'admission_number'])
+                ->preload(),
+            ...static::getEnrollmentDetailFormComponents(),
         ];
     }
 

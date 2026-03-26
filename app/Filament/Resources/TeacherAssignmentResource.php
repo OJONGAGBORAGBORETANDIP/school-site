@@ -4,15 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TeacherAssignmentResource\Pages;
 use App\Models\TeacherAssignment;
+use Filament\Actions\BulkAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Actions\BulkAction;
-use Filament\Schemas\Components\Utilities\Get;
-use Closure;
-
+use Illuminate\Validation\ValidationException;
 
 class TeacherAssignmentResource extends Resource
 {
@@ -30,14 +28,15 @@ class TeacherAssignmentResource extends Resource
         return 'School Structure';
     }
 
-    public static function getFormComponents(): array
+    /**
+     * Teacher and section fields shared by create (bulk subjects) and edit (single subject).
+     */
+    public static function getTeacherAndSectionFormComponents(): array
     {
         return [
             Forms\Components\Select::make('teacher_id')
                 ->label('Teacher')
-                ->relationship('teacher', 'name', fn ($query) => 
-                    $query->whereHas('roles', fn ($q) => $q->where('name', 'teacher'))
-                )
+                ->relationship('teacher', 'name', fn ($query) => $query->whereHas('roles', fn ($q) => $q->where('name', 'teacher')))
                 ->required()
                 ->searchable()
                 ->preload(),
@@ -47,23 +46,36 @@ class TeacherAssignmentResource extends Resource
                 ->required()
                 ->searchable()
                 ->preload(),
+        ];
+    }
+
+    /**
+     * Create modal: multiple subjects (one assignment row per subject).
+     */
+    public static function getCreateFormComponents(): array
+    {
+        return [
+            ...static::getTeacherAndSectionFormComponents(),
+            Forms\Components\Select::make('subject_ids')
+                ->label('Subjects')
+                ->multiple()
+                ->relationship('subject', 'name')
+                ->required()
+                ->searchable()
+                ->preload()
+                ->dehydrated(true)
+                ->saveRelationshipsUsing(null),
+        ];
+    }
+
+    public static function getFormComponents(): array
+    {
+        return [
+            ...static::getTeacherAndSectionFormComponents(),
             Forms\Components\Select::make('subject_id')
                 ->label('Subject')
                 ->relationship('subject', 'name')
                 ->required()
-                ->rules([
-                    fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
-            
-                        $exists = TeacherAssignment::where('teacher_id', $get('teacher_id'))
-                            ->where('class_section_id', $get('class_section_id'))
-                            ->where('subject_id', $value)
-                            ->exists();
-            
-                        if ($exists) {
-                            $fail('This teacher is already assigned to this class and subject.');
-                        }
-                    },
-                ])
                 ->searchable()
                 ->preload(),
         ];
@@ -98,8 +110,7 @@ class TeacherAssignmentResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('teacher_id')
                     ->label('Teacher')
-                    ->relationship('teacher', 'name', fn ($query) => 
-                        $query->whereHas('roles', fn ($q) => $q->where('name', 'teacher'))
+                    ->relationship('teacher', 'name', fn ($query) => $query->whereHas('roles', fn ($q) => $q->where('name', 'teacher'))
                     )
                     ->searchable()
                     ->preload(),
@@ -119,7 +130,22 @@ class TeacherAssignmentResource extends Resource
                     ->icon('heroicon-o-pencil')
                     ->form(static::getFormComponents())
                     ->fillForm(fn ($record) => $record->toArray())
-                    ->action(fn ($record, array $data) => $record->update($data)),
+                    ->action(function (TeacherAssignment $record, array $data): void {
+                        $duplicate = TeacherAssignment::query()
+                            ->where('teacher_id', $data['teacher_id'])
+                            ->where('class_section_id', $data['class_section_id'])
+                            ->where('subject_id', $data['subject_id'])
+                            ->whereKeyNot($record->getKey())
+                            ->exists();
+
+                        if ($duplicate) {
+                            throw ValidationException::withMessages([
+                                'subject_id' => __('This teacher is already assigned to this class and subject.'),
+                            ]);
+                        }
+
+                        $record->update($data);
+                    }),
                 \Filament\Actions\Action::make('delete')
                     ->icon('heroicon-o-trash')
                     ->color('danger')

@@ -11,6 +11,26 @@ class Enrollment extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::saving(function (Enrollment $enrollment): void {
+            if (filled($enrollment->class_level) || ! $enrollment->class_section_id) {
+                return;
+            }
+
+            $level = ClassSection::query()
+                ->whereKey($enrollment->class_section_id)
+                ->with('schoolClass')
+                ->first()
+                ?->schoolClass
+                ?->level;
+
+            if ($level !== null) {
+                $enrollment->class_level = $level;
+            }
+        });
+    }
+
     protected $fillable = [
         'student_id',
         'class_section_id',
