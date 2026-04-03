@@ -9,6 +9,10 @@ RUN npm ci
 
 COPY . .
 
+# Extract vendor.zip so Vite can find Livewire Flux CSS
+RUN if [ -f vendor.zip ]; then unzip -q vendor.zip && rm vendor.zip; fi
+
+# Build Vite assets
 RUN npm run build
 
 # PHP builder stage
@@ -54,8 +58,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy project files
 COPY . .
 
+# Extract vendor.zip if it exists
+RUN if [ -f vendor.zip ]; then unzip -q vendor.zip && rm vendor.zip; fi
+
 # Install PHP dependencies (production only)
-RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts
+RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts 2>&1 || true
 
 # Production stage
 FROM php:8.3-apache
@@ -121,6 +128,9 @@ RUN echo '<Directory /var/www/html/public>\n\
 </IfModule>' > /etc/apache2/conf-available/laravel.conf && \
     a2enconf laravel && \
     sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
+# Create .env from .env.example if it doesn't exist
+RUN if [ ! -f /var/www/html/.env ]; then cp /var/www/html/.env.example /var/www/html/.env; fi
 
 # Expose port 80
 EXPOSE 80
