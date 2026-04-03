@@ -70,14 +70,17 @@ RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf && \
     a2enconf laravel && \
     sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
-# Configure Apache to listen on PORT environment variable (default 80)
-RUN sed -i 's/Listen 80/Listen ${PORT:-80}/' /etc/apache2/ports.conf
-
 # Create .env from .env.example if it doesn't exist
 RUN if [ ! -f /var/www/html/.env ]; then cp /var/www/html/.env.example /var/www/html/.env; fi
 
-# Expose dynamic port
-EXPOSE ${PORT:-80}
+# Create startup script
+RUN echo '#!/bin/bash\n\
+PORT=${PORT:-8080}\n\
+sed -i "s/Listen 8080/Listen $PORT/" /etc/apache2/ports.conf\n\
+apache2-foreground' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
+
+# Expose default port (Render will override with PORT env var)
+EXPOSE 8080
 
 # Start Apache with dynamic port
-CMD ["sh", "-c", "sed -i \"s/Listen [0-9]*/Listen ${PORT:-80}/\" /etc/apache2/ports.conf && apache2-foreground"]
+CMD ["/usr/local/bin/start.sh"]
