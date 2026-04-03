@@ -50,8 +50,9 @@ RUN chown -R www-data:www-data /var/www/html && \
     chmod -R 755 /var/www/html && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Configure Apache for Laravel
-RUN echo '<Directory /var/www/html/public>\n\
+# Configure Apache for Laravel with ServerName
+RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf && \
+    echo '<Directory /var/www/html/public>\n\
     Options Indexes FollowSymLinks\n\
     AllowOverride All\n\
     Require all granted\n\
@@ -69,11 +70,14 @@ RUN echo '<Directory /var/www/html/public>\n\
     a2enconf laravel && \
     sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
+# Configure Apache to listen on PORT environment variable (default 80)
+RUN sed -i 's/Listen 80/Listen ${PORT:-80}/' /etc/apache2/ports.conf
+
 # Create .env from .env.example if it doesn't exist
 RUN if [ ! -f /var/www/html/.env ]; then cp /var/www/html/.env.example /var/www/html/.env; fi
 
-# Expose port 80
-EXPOSE 80
+# Expose dynamic port
+EXPOSE ${PORT:-80}
 
-# Start Apache
-CMD ["apache2-foreground"]
+# Start Apache with dynamic port
+CMD ["sh", "-c", "sed -i \"s/Listen [0-9]*/Listen ${PORT:-80}/\" /etc/apache2/ports.conf && apache2-foreground"]

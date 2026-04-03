@@ -6,8 +6,6 @@ services:
     container_name: school-site-web
     ports:
       - "80:80"
-    volumes:
-      - .:/var/www/html
     depends_on:
       db:
         condition: service_healthy
@@ -20,26 +18,12 @@ services:
       - DB_PASSWORD=school_password
       - APP_ENV=production
       - APP_DEBUG=false
+      - APP_URL=http://localhost
+    volumes:
+      - ./storage:/var/www/html/storage
     networks:
       - school-network
     restart: unless-stopped
-
-  # Development service for Vite dev server (optional, for local development)
-  dev:
-    image: node:22-alpine
-    container_name: school-site-dev
-    working_dir: /app
-    volumes:
-      - .:/app
-    ports:
-      - "5173:5173"
-    command: npm run dev
-    environment:
-      - VITE_HOST=0.0.0.0
-    networks:
-      - school-network
-    profiles:
-      - dev
 
   db:
     image: mysql:8.0
