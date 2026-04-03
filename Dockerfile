@@ -7,10 +7,10 @@ WORKDIR /var/www/html
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     libpq-dev \
-    libmcrypt-dev \
-    mysql-client \
+    mariadb-client \
     git \
     curl \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions commonly used in school sites
