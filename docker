@@ -6,31 +6,42 @@ WORKDIR /var/www/html
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libmcrypt-dev \
+    mysql-client \
     git \
-    unzip \
-    libzip-dev \
     curl \
-    libonig-dev \
-    libpng-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl gd
+    && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Install PHP extensions commonly used in school sites
+RUN docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    mysqli \
+    mbstring \
+    gd \
+    curl \
+    json \
+    bcmath
 
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Enable Apache modules
+RUN a2enmod rewrite headers
 
-# Copy application code
+# Copy composer from official image
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy project files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install PHP dependencies (if composer.json exists)
+RUN if [ -f composer.json ]; then composer install --no-interaction --optimize-autoloader; fi
 
-# Copy Apache config (optional, if you want .htaccess support)
-# COPY ./docker/apache.conf /etc/apache2/sites-available/000-default.conf
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html
 
 # Expose port 80
 EXPOSE 80
 
-# Start Apache in foreground
+# Start Apache
 CMD ["apache2-foreground"]
