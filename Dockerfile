@@ -83,4 +83,4 @@ apache2-foreground' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.s
 EXPOSE 8080
 
 # Start Apache with dynamic port
-CMD ["/usr/local/bin/start.sh"]
+CMD ["/usr/local/bin/start.sh
