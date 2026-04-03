@@ -12,7 +12,7 @@ COPY . .
 RUN npm run build
 
 # PHP builder stage
-FROM php:8.2-apache as php_builder
+FROM php:8.3-apache as php_builder
 
 WORKDIR /var/www/html
 
@@ -58,7 +58,7 @@ COPY . .
 RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts
 
 # Production stage
-FROM php:8.2-apache
+FROM php:8.3-apache
 
 WORKDIR /var/www/html
 
