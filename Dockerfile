@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
+    libicu-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install oniguruma from source
@@ -35,13 +36,16 @@ RUN cd /tmp && \
 
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-configure intl && \
     docker-php-ext-install \
     pdo \
     pdo_mysql \
     mysqli \
     mbstring \
     gd \
-    bcmath
+    bcmath \
+    intl \
+    zip
 
 # Enable Apache modules
 RUN a2enmod rewrite headers
