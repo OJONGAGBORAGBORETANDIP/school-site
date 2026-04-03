@@ -7,21 +7,24 @@ WORKDIR /var/www/html
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     libpq-dev \
+    libonig-dev \
     mariadb-client \
     git \
     curl \
     unzip \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions commonly used in school sites
-RUN docker-php-ext-install \
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install \
     pdo \
     pdo_mysql \
     mysqli \
     mbstring \
     gd \
-    curl \
-    json \
     bcmath
 
 # Enable Apache modules
