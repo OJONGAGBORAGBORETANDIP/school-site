@@ -4,18 +4,17 @@ WORKDIR /var/www/html
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
     mariadb-client \
     git \
     curl \
     unzip \
-    libfreetype6 \
-    libjpeg62-turbo \
-    libpng3 \
-    libicu76 \
-    libonig5 \
-    libzip5 \
     npm \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libicu-dev \
+    libonig-dev \
+    libzip-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
