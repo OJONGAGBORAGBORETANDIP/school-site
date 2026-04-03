@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libicu-dev \
     libonig-dev \
+    libzip-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure and install PHP extensions
