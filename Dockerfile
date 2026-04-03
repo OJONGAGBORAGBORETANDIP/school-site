@@ -1,78 +1,14 @@
-# Build stage - compile assets with Node.js
-FROM node:22-alpine as node_builder
-
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-
-RUN npm ci
-
-COPY . .
-
-# Extract vendor.zip so Vite can find Livewire Flux CSS
-RUN if [ -f vendor.zip ]; then unzip -q vendor.zip && rm vendor.zip; fi
-
-# Build Vite assets
-RUN npm run build
-
-# PHP builder stage
-FROM php:8.3-apache as php_builder
-
-WORKDIR /var/www/html
-
-# Install all required system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev \
-    mariadb-client \
-    git \
-    curl \
-    unzip \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    libicu-dev \
-    libonig-dev \
-    libzip-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
-    docker-php-ext-configure intl && \
-    docker-php-ext-install -j$(nproc) \
-    pdo \
-    pdo_mysql \
-    mysqli \
-    mbstring \
-    gd \
-    bcmath \
-    intl \
-    zip \
-    opcache
-
-# Enable Apache modules
-RUN a2enmod rewrite headers
-
-# Copy composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Copy project files
-COPY . .
-
-# Extract vendor.zip if it exists
-RUN if [ -f vendor.zip ]; then unzip -q vendor.zip && rm vendor.zip; fi
-
-# Install PHP dependencies (production only)
-RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts 2>&1 || true
-
-# Production stage
 FROM php:8.3-apache
 
 WORKDIR /var/www/html
 
-# Install runtime dependencies only
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     mariadb-client \
+    git \
+    curl \
+    unzip \
     libfreetype6 \
     libjpeg62-turbo \
     libpng6 \
@@ -96,14 +32,8 @@ RUN docker-php-ext-install -j$(nproc) \
 # Enable Apache modules
 RUN a2enmod rewrite headers
 
-# Copy PHP configuration
-COPY --from=php_builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
-
-# Copy Laravel files from PHP builder
-COPY --from=php_builder --chown=www-data:www-data /var/www/html /var/www/html
-
-# Copy compiled assets from Node builder
-COPY --from=node_builder --chown=www-data:www-data /app/public/build /var/www/html/public/build
+# Copy project files
+COPY . .
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html && \
@@ -134,10 +64,6 @@ RUN if [ ! -f /var/www/html/.env ]; then cp /var/www/html/.env.example /var/www/
 
 # Expose port 80
 EXPOSE 80
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
 
 # Start Apache
 CMD ["apache2-foreground"]
