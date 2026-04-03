@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: school-site-web
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=school_db
+      - DB_USERNAME=school_user
+      - DB_PASSWORD=school_password
+      - APP_ENV=production
+      - APP_DEBUG=false
+    networks:
+      - school-network
+    restart: unless-stopped
+
+  # Development service for Vite dev server (optional, for local development)
+  dev:
+    image: node:22-alpine
+    container_name: school-site-dev
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "5173:5173"
+    command: npm run dev
+    environment:
+      - VITE_HOST=0.0.0.0
+    networks:
+      - school-network
+    profiles:
+      - dev
+
+  db:
+    image: mysql:8.0
+    container_name: school-site-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: school_db
+      MYSQL_USER: school_user
+      MYSQL_PASSWORD: school_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - school-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  db_data:
+
+networks:
+  school-network:
+    driver: bridge

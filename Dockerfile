@@ -1,11 +1,23 @@
-# Use official PHP image with Apache
-FROM php:8.2-apache
+# Build stage - compile assets with Node.js
+FROM node:22-alpine as node_builder
 
-# Set working directory
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+# PHP builder stage
+FROM php:8.2-apache as php_builder
+
 WORKDIR /var/www/html
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install all required system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     mariadb-client \
     git \
@@ -22,7 +34,7 @@ RUN apt-get update && apt-get install -y \
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
     docker-php-ext-configure intl && \
-    docker-php-ext-install \
+    docker-php-ext-install -j$(nproc) \
     pdo \
     pdo_mysql \
     mysqli \
@@ -30,26 +42,92 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
     gd \
     bcmath \
     intl \
-    zip
+    zip \
+    opcache
 
 # Enable Apache modules
 RUN a2enmod rewrite headers
 
-# Copy composer from official image
+# Copy composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copy project files
 COPY . .
 
-# Install PHP dependencies (if composer.json exists)
-RUN if [ -f composer.json ]; then composer install --no-interaction --optimize-autoloader; fi
+# Install PHP dependencies (production only)
+RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts
+
+# Production stage
+FROM php:8.2-apache
+
+WORKDIR /var/www/html
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    mariadb-client \
+    libfreetype6 \
+    libjpeg62-turbo \
+    libpng6 \
+    libicu76 \
+    libonig5 \
+    libzip4 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install -j$(nproc) \
+    pdo \
+    pdo_mysql \
+    mysqli \
+    mbstring \
+    gd \
+    bcmath \
+    intl \
+    zip \
+    opcache
+
+# Enable Apache modules
+RUN a2enmod rewrite headers
+
+# Copy PHP configuration
+COPY --from=php_builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+
+# Copy Laravel files from PHP builder
+COPY --from=php_builder --chown=www-data:www-data /var/www/html /var/www/html
+
+# Copy compiled assets from Node builder
+COPY --from=node_builder --chown=www-data:www-data /app/public/build /var/www/html/public/build
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html && \
-    chmod -R 755 /var/www/html
+    chmod -R 755 /var/www/html && \
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Configure Apache for Laravel
+RUN echo '<Directory /var/www/html/public>\n\
+    Options Indexes FollowSymLinks\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>\n\
+<IfModule mod_rewrite.c>\n\
+    <IfModule mod_negotiation.c>\n\
+        Options -MultiViews\n\
+    </IfModule>\n\
+    RewriteEngine On\n\
+    RewriteCond %{REQUEST_FILENAME} -d [OR]\n\
+    RewriteCond %{REQUEST_FILENAME} -f\n\
+    RewriteRule ^ ^ [L]\n\
+    RewriteRule ^ /index.php [L]\n\
+</IfModule>' > /etc/apache2/conf-available/laravel.conf && \
+    a2enconf laravel && \
+    sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
 # Expose port 80
 EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
 
 # Start Apache
 CMD ["apache2-foreground"]
