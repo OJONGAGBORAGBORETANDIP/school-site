@@ -15,10 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libicu76 \
     libonig5 \
     libzip5 \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install -j$(nproc) \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install -j$(nproc) \
     pdo \
     pdo_mysql \
     mysqli \
@@ -32,8 +34,17 @@ RUN docker-php-ext-install -j$(nproc) \
 # Enable Apache modules
 RUN a2enmod rewrite headers
 
+# Copy Composer from official image
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 # Copy project files
 COPY . .
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Install Node dependencies and build Vite assets
+RUN npm ci && npm run build
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html && \
