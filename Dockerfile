@@ -11,10 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     libfreetype6 \
     libjpeg62-turbo \
-    libpng6 \
+    libpng16 \
     libicu76 \
     libonig5 \
-    libzip4 \
+    libzip5 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
